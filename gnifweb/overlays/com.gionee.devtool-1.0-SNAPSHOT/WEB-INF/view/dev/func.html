@@ -1,0 +1,147 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>开发工具</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+	<div class="easyui-layout" data-options="fit:true" style="">
+	  <div data-options="region:'west',border:false" style="width:200px;padding:10px;">
+		<ul id="res${rand}"></ul>
+	  </div>
+	  <div data-options="region:'center',border:false" style="">
+		<div class="easyui-layout" data-options="fit:true" style="">
+		  <div data-options="region:'north',border:false" style="height:50px;padding:10px;">
+			<div class="sitem" id="genvm${rand}" style="display:none;">在页面 [ <span id="pageaction${rand}" class="blue"></span> ] 中生成： <input type="text" id="viewmethod${rand}"/></div>
+		  </div>
+		  <div data-options="region:'center',border:false" style="padding:10px;">
+			<table id="subres${rand}"></table>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	<script type="text/javascript">
+$(function() {
+  var res = $('#res${rand}');
+  var subres = $('#subres${rand}');
+  var viewmethod = $('#viewmethod${rand}');
+  var genvm = $('#genvm${rand}');
+  var pageaction = $('#pageaction${rand}');
+  
+  var currentPid;
+
+  var resTypes = [{text:'资源',value:'0'},{text:'菜单',value:'1'},{text:'页面',value:'2'},{text:'按钮',value:'3'},{text:'块区域',value:'4'}];
+  var getResType = function(value, row, index) {
+	if (!value) {
+	  // add new resource
+	  row.type = '0';
+	  row.pid = currentPid;
+	  value = '0';
+	}
+	return resTypes[value].text;
+  }
+
+  var refreshRes = function() {
+	var node = res.tree('find', currentPid);
+	res.tree('append', {
+	  parent: node.target,
+	  data: [{text:'加载中...'}]
+	});
+	res.tree('reload', node.target);
+  }
+
+  viewmethod.combobox({
+	data:[
+	  {value: 'crud_create,create.json', text: '新增按钮'},
+	  {value: 'crud_edit,load.json', text: '编辑按钮'},
+	  {value: 'crud_save,save.json', text: '保存按钮'},
+	  {value: 'crud_remove,remove.json', text: '删除按钮'}
+	],
+	onSelect: function(record) {
+	  var params = record.value.split(',');
+	  var url = pageaction.text();
+
+	  url = url.substring(0,url.length-5) + '/' + params[1];
+	  $.post('dev/generate_view.json', {id: currentPid, method: params[0], args: url}, function(result){
+		if (result.success) {
+		  $.messager.show({
+			title:'提示',
+			msg:'生成代码成功'
+		  });
+		  refreshRes();
+		  subres.edatagrid('reload');
+		}
+		else {
+		  $.messager.alert('错误', '生成代码错误');
+		}
+	  });
+	}
+  });
+
+  res.tree({
+	url:'dev/res.json',
+	dnd: true,
+	onDrop: function(target,source,point) {
+	  var pid;
+	  if (point == 'append') {
+		pid = res.tree('getNode', target).id;
+	  }
+	  else {
+		pid = res.tree('getParent', target).id;
+	  }
+	  $.post('dev/update_res.json', {id: source.id, pid: pid});
+	},
+	onClick: function(node) {
+	  subres.edatagrid({
+		url: 'dev/subres.json?id=' + node.id,
+		fit: true,
+		columns: [[
+		  {field:'id',checkbox:true},
+		  {field:'type',title:'类型',width:80,editor:{type:'combobox',options:{data:resTypes}},formatter:getResType},
+		  {field:'name',title:'名称',width:100,editor:{type:'text'}},
+		  {field:'code',title:'编码',width:100,editor:{type:'text'}},
+		  {field:'index',title:'排序',width:30,editor:{type:'numberbox'}},
+		  {field:'action',title:'操作方法',width:150,editor:{type:'text'}},
+		  {field:'url',title:'拦截地址',width:150,editor:{type:'text'}},
+		  {field:'icon',title:'图标',width:100,editor:{type:'text'}}
+		]],
+		idField: 'id',
+		saveUrl: 'dev/save_res.json',
+		updateUrl: 'dev/update_res.json',
+		destroyUrl: 'dev/delete_res.json',
+		onSave: function(index,row) {refreshRes();},
+		onDestroy: function(index,row) {refreshRes();},
+		onError: function(index,data) {$.messager.alert('错误', data.message)},
+		toolbar: [
+		  {text:'新增',iconCls:'icon-add',handler:function(){subres.edatagrid('addRow');}},
+		  {text:'保存',iconCls:'icon-ok',handler:function(){subres.edatagrid('saveRow');}},
+		  {text:'取消',iconCls:'icon-cancel',handler:function(){subres.edatagrid('cancelRow');}},
+		  {text:'删除',iconCls:'icon-remove',handler:function(){subres.edatagrid('destroyRow');}},
+		]
+	  });
+	  currentPid = node.id;
+	  console.log(node);
+	  if (node.iconCls == "icon-page") {
+		if (node.attributes) {
+		  pageaction.text(node.attributes.action);
+		}
+		else {
+		  pageaction.text('ACTION_NOT_SET');
+		}
+		genvm.show();
+	  }
+	  else {
+		genvm.hide();
+	  }
+	}
+  });
+});  
+	</script>
+  </body>
+</html>

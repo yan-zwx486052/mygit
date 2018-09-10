@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+		 metadata-complete="true"
+		 version="2.5"> 
+
+  <description>
+    GNIF Example
+  </description>
+  <display-name>GNIF Example</display-name>
+
+	<!-- springMVC servlet -->
+  <servlet>
+	<servlet-name>spring</servlet-name>
+	<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+	<init-param>
+	  <param-name>contextConfigLocation</param-name>
+	  <param-value>/WEB-INF/web-context.xml</param-value>
+	</init-param>
+	<load-on-startup>1</load-on-startup>
+  </servlet>
+	<!-- 拦截后缀1 -->
+  <servlet-mapping>
+	<servlet-name>spring</servlet-name>
+	<url-pattern>*.json</url-pattern>
+  </servlet-mapping>
+	<!-- 拦截后缀2 -->
+  <servlet-mapping>
+	<servlet-name>spring</servlet-name>
+	<url-pattern>*.html</url-pattern>
+  </servlet-mapping>
+
+	<!-- spring监听器 -->
+  <listener>
+	<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+  </listener>
+
+	<!-- 字符编码过滤器 -->
+  <filter>
+	<filter-name>characterEncodingFilter</filter-name>
+	<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+	<init-param>
+      <param-name>encoding</param-name>
+      <param-value>UTF-8</param-value>
+	</init-param>
+  </filter>
+	<filter-mapping>
+	<filter-name>characterEncodingFilter</filter-name>
+	<url-pattern>/*</url-pattern>
+  </filter-mapping>
+
+	<!--<filter>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>springSecurityFilterChain</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+
+  <!-- spring配置文件（该元素用来声明应用范围(整个WEB项目)内的上下文初始化参数） -->
+  <context-param>
+	<param-name>contextConfigLocation</param-name>
+	<param-value>/WEB-INF/biz-context.xml</param-value>
+	<!--param-value>/WEB-INF/biz-context.xml,/WEB-INF/security-context.xml</param-value-->
+  </context-param>
+
+</web-app>

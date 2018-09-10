@@ -1,0 +1,32 @@
+<!doctype html>
+<#include "/common/lib.ftl">
+<html>
+  <head>
+    <base href="${base}"></base>
+    <meta charset="utf-8"/>
+    <title>开发工具</title>
+    <link rel="stylesheet" type="text/css" href="css/themes/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="css/themes/icon.css"/>
+    <link rel="stylesheet" type="text/css" href="css/gnif.css"/>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="js/locale/easyui-lang-zh_CN.js"></script>
+    <script type="text/javascript" src="js/jquery.edatagrid.js"></script>
+    <script type="text/javascript" src="js/gnif.js"></script>
+  </head>
+  <body class="easyui-layout">
+    <div data-options="region:'north',border:false" style="height:30px;background:#eeeeff;">
+    </div>
+    <div data-options="region:'west',border:false,split:true,title:'操作菜单'" style="width:200px;margin-left:10px;" id="itsm-menu">
+      <ul id="gnif-menu" class="easyui-tree">
+		<@menu 0 />
+      </ul>
+    </div>
+    <div data-options="region:'center',border:false" style="">
+      <div id="gnif-tab" class="easyui-tabs" data-options="fit:true,border:false,plain:true">
+        <div title="首页" data-options="closable:true,fit:true" href="dev/intro.html">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

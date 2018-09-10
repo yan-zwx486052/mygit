@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>学生表</title>
+<link rel="stylesheet" type="text/css" href="css/themes/default/easyui.css"/>
+<link rel="stylesheet" type="text/css" href="css/themes/icon.css"/>
+<link rel="stylesheet" type="text/css" href="css/gnif.css"/>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="js/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="js/jquery.edatagrid.js"></script>
+<script type="text/javascript" src="js/gnif.js"></script>
+<script type="text/JavaScript" src="js/jquery-form.js"></script>
+<script type="text/JavaScript" src="js/jquery.validate.min.js"></script>
+<script type="text/JavaScript" src="js/Ajax.js"></script>
+	<style type="text/css">
+		body {
+			margin:0px;
+			padding:0px;
+			width:100%;
+			height:100%;
+		}
+	</style>
+<script type="text/javascript">
+	$(function() {
+        $('#stu-dg').datagrid({
+		    url: 'stu/stu_list.json',
+		    fit: true,
+		    striped:true,
+		    nowrap:true,
+		    loadMsg:'数据正在加载，请稍候...', 
+		    pagination:true,
+		    rownumbers: true,
+		    singleSelect: false,//是否限制为单选
+		    columns: [[
+			  {field:'ch',checkbox:true},
+		      {field:'id',title:'编号',align:'center',width : 100},
+		      {field:'name',title:'姓名',align:'center',width : 100},
+		      {field:'phone',title:'电话',align:'center',width : 100}
+		    ]],
+		    fitColumns : true,//真正的自动展开/收缩列的大小，以适应网格的宽度，防止水平滚动。
+
+		    //工具栏
+		    toolbar: [
+		      		{
+					text : '新增',
+					iconCls : 'icon-add',
+					iconAlign:'left',
+					handler : function() {
+						$("#stu-dlg").dialog("open").dialog("setTitle", "添加用户信息");
+						$('#updateInfo').hide();//隐藏选择的元素
+						$('#saveInfo').show();
+						$('#stu-fm').form('clear');//打开一个对话框并清空表单数据
+				        //url = "stu/stu_save.json";
+					}
+				},
+				'-',
+				{
+					text : '修改',
+					iconCls : 'icon-edit',
+					iconAlign:'left',
+					handler : function() {
+					if($("input[type='checkbox']:checked").length<=0){
+						alert("用户请先选择数据");
+					}else if($("input[type='checkbox']:checked").length>=2){
+						alert("用户请每次选中一个数据");									
+					}else{
+						var row = $("#stu-dg").datagrid("getSelected");
+						if (row) {
+			                $("#stu-dlg").dialog("open").dialog('setTitle', '修改用户信息');
+			            	$('#saveInfo').hide();
+			            	$('#updateInfo').show();
+			                $("#stu-fm").form("load", row);//打开一个对话框并从dialog选择的行中加载表单数据
+			                //url =row.id+ 'stu/stu_update.json';
+					} 
+					}
+						}
+				},
+				'-',
+				{
+					text : '删除',
+					iconCls : 'icon-remove',
+					handler : function() {
+					   var row = $('#stu-dg').datagrid('getSelected');
+					   var selectedRows = $("#stu-dg").datagrid("getSelections");
+					    if (selectedRows.length == 0) {
+					        $.messager.alert("系统提示", "请选择要删除的数据！");
+					        return;
+					    }
+					 	if (row) {
+						  $.messager.confirm('删除用户信息', '你确定删除当前用户信息吗?', 
+						function (r) {
+							  if (r) {
+								  $('#deleteInfo').hide();
+					  			  $.post('stu/'+row.id+'/stu_delete.json', function (result) {
+					  					//var result = eval('(' + result + ')');
+					                     if (result) {
+					                    	 		$.messager.alert("系统提示", "数据已成功删除！");
+					                                $('#stu-dg').datagrid('reload');   
+					                            }else{
+					                            	$.messager.alert("系统提示", "数据删除失败，请联系系统管理员！"); 
+					                            } },'json')
+							 }										  
+						 }
+					)}
+				}},
+				'-',
+				{id:'btnsave',
+					text:'导出',
+					iconCls:'icon-save',
+					handler:function(){
+						var url = 'stu/stu_export.json?method=sheetsExport';
+						window.location.href=url;
+					}}
+		    ],
+		    pageSize : 10,
+			pageList : [ 10, 15, 20 ],
+			rowStyler : function(index, row) {
+				if (row.id < 30) {
+					return 'color:blue;';
+				} 
+			},
+		  });
+	});
+	//导入数据
+    $(function() {
+   	function resetValue() {
+   	    $("#name").val("");
+   	    $("#phone").val("");
+   	}
+
+		alert("222222222222222");
+		$("#upload_excel").resetForm().validate({
+			rules:{"import_fileup":{
+				required:true,
+				accept:"xls"
+			},
+				message:{
+					"import_fileup":{
+						require:"请选择文件",
+						accept:"error please upload .xls file"
+					}
+				},
+				submitHandler:function(form){
+					alert("555555555")
+					$(form).ajaxSubmit({
+						url:"stu/stu_importExcel.json",
+						type:"post",
+						enctype:"multipart/form-data",
+						contentType: "application/x-www-form-urlencoded; charset=utf-8",
+						dataType:"json",
+						success:function(data){
+							alert("333");
+							var str = "";
+							for (var i=0, len=data.length; i < len; i++) {
+								str += "<p>";
+								str += data[i]["deparement"] + "," + data[i]["name"] + "," + data[i]["date"];
+								str += "</p>";
+							}
+							$("#jsonBtn").removeAttr("disabled").removeAttr("title");
+						},
+						error: function() {
+							alert('error');
+						}
+					})
+				}
+			}
+		});
+
+
+   	//查詢提示框
+        $("#searchUserDialog").click(function () {
+            var name = $("#t_name").val();
+            var phone = $("#t_phone").val();
+            $("#stu-dg").datagrid('load', {
+                name : name,
+                phone: phone
+            });
+            //alert("222222222222222");
+            $.post("stu/stu_list.json",{name:name,phone:phone});
+            //alert("1111111");
+      });
+        //保存函数
+    $("#saveInfo").click(function(){
+	    $("#stu-fm").form("submit", {
+	        url :"stu/stu_save.json",
+	        onSubmit : function() {
+	            /* if ($("#roleName").combobox("getValue") == "") {
+	                $.messager.alert("系统提示", "请选择用户角色！");
+	                return false;
+	            } */
+	            return $(this).form("validate");
+	        },
+	        success : function(data) {
+	            var result = eval('(' + data + ')');
+	            if (result) {
+	                $.messager.alert("系统提示", "保存成功！");
+	                resetValue();
+	                $("#stu-dlg").dialog("close");
+	                $("#stu-dg").datagrid("reload");
+	            } else {
+	                $.messager.alert("系统提示", "保存失败！");
+	                return;
+	            }
+	        }
+	    });
+	});
+	//修改函数
+	 $("#updateInfo").click(function(){
+			var row = $("#stu-dg").datagrid("getSelected");
+			//alert(row.id);
+			$('#stu-fm').form('submit',{
+				url: 'stu/'+row.id+'/stu_update.json',
+				onSubmit: function(){
+					return $(this).form('validate');
+				},
+				success: function(result){
+					//var result = eval('('+result+')');
+					if (result){
+						$.messager.alert("系统提示", "数据已成功修改！");
+						$('#stu-dlg').dialog('close');		// close the dialog
+						$('#stu-dg').datagrid('reload');	// reload the user data
+					} else {
+						$.messager.show({
+							title: '系统提示',
+							msg: result.errorMsg
+						});
+					}
+				}
+			});
+		}); 
+
+		//关闭按钮
+		$("#closeUserDialog").click(function(){
+			$("#stu-dlg").dialog("close");
+		    resetValue();
+		});
+	});
+</script>
+</head>
+
+<body class="easyui-layout">
+<div class="easyui-layout" id="subWrap" data-options="fit:true">
+	<div data-options="region:'north',border:false" style="height:65px;">
+		<table width="100%" border="0" cellpadding="0" cellspacing="0"
+			   background="image/bg.jpg" height="60">
+			<tr>
+				<td width="683" style="background-image:url(image/bg.jpg)">
+					<img src="image/banner.jpg" width="450" height="60" />
+				</td>
+				<td valign="middle" width="100%" align="right">
+					欢迎，张乐乐&nbsp;&nbsp;来到工作流平台&nbsp;&nbsp;
+					<a href="j_spring_cas_security_logout">退出</a>&nbsp;&nbsp;
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div region="east" split="true" title="East" style="width:200px;padding:10px;">east region</div>
+	<div region="west" split="true" style="width:240px;">
+	<div class="easyui-accordion" data-options="region:'west',border:false,split:true,fit:true" title="功能列表" style="width:300px;height:200px;">
+		<div title="我的任务" data-options="selected:false" iconCls="icon-ok" style="overflow:auto;padding:10px;">
+			<h3 style="color:#0099FF;">Accordion for jQuery</h3>
+			<p>Accordion is a part of easyui framework for jQuery. It lets you define your accordion component on web page more easily.</p>
+		</div>
+		<div title="我的流程" data-options="selected:false" iconCls="icon-reload" style="padding:10px;">
+			easyui help you build your web page easily
+		</div>
+		<div title="操作菜单">
+			<ul id="tt1" class="easyui-tree">
+				<li>
+					<span>Folder1</span>
+					<ul>
+						<li>
+							<span>Sub Folder 1</span>
+							<ul>
+								<li><span>File 11</span></li>
+								<li><span>File 12</span></li>
+								<li><span>File 13</span></li>
+							</ul>
+						</li>
+						<li><span>File 2</span></li>
+						<li><span>File 3</span></li>
+					</ul>
+				</li>
+				<li><span>File2</span></li>
+			</ul>
+		</div>
+		<div title="" selected style="padding:10px;"></div>
+	</div>
+	</div>
+  <div data-options="region:'center',border:false">
+    <div id="gnif-tab" class="easyui-tabs" data-options="fit:true">
+          <div title="首页" data-options="region:'center',border:false">
+		   <!-- 表格数据展示 -->
+			  <div id="cc" class="easyui-layout" data-options="fit:true">
+				  <div data-options="region:'north',height:60" style="line-height:20px;border:0px solid #ccc">
+					  <span>姓名:</span>
+					  <input id="t_name" name="name" style="margin-top:3px;margin-left:3px;line-height:20px;border:1px solid #ccc">
+					  <span>电话:</span>
+					  <input id="t_phone" name="phone" style="margin-top:3px;margin-left:3px;line-height:20px;border:1px solid #ccc">
+					  <a href="#" id ="searchUserDialog"  class="easyui-linkbutton" plain="true"
+						 data-options="iconCls:'icon-search'">搜索</a>
+					  <form enctype="multipart/form-data" method="post" id="upload_excel">
+						  <input type="file" name="import_fileup" id="import_fileup" title="导入数据"/>
+                            <input type="submit" name="import_file" id="import_file" title="上传数据"/>
+					  </form>
+				  </div>
+				  <div data-options="region:'center'" style="line-height:20px;border:0px solid #ccc">
+					  <table id="stu-dg"></table>
+				  </div>
+			  </div>
+		  </div>
+    </div>
+   </div>
+</div>
+
+	<!-- 弹出框绑定操作按钮（位置） -->
+	<div id="stu-dlg" class="easyui-dialog" data-options="closed:true" style="width:580px;height:480px;padding:10px 10px;" buttons="#dlg-buttons">
+	  <form id="stu-fm" method="post">
+	    <input type="hidden" name="id">
+	    <div class="ftitle"><label>基本信息</label></div>
+	    <div class="fitem"><label>姓名</label><input name="name" id="name" type="text" class="easyui-validatebox" data-options="required:true" /></div>
+	    <div class="fitem"><label>电话</label><input name="phone" id="phone" type="text" class="easyui-validatebox" data-options="required:true" /></div>
+	    <!-- <div class="fitem"><label>性别</label><input name="gender" type="text" class="easyui-combobox" data-options="required:true,data:[{text:'男',value:'1'},{text:'女',value:'0'}]"></div>
+    	<div class="fitem"><label>地址</label><input name="address" type="text" class="easyui-validatebox" data-options="required:true" /></div> -->
+	  </form>
+	  
+	  <!-- 弹出框按钮 -->
+	  <div id="dlg-buttons">
+	  <table cellpadding="0" cellspacing="0" style="width:100%">
+		  	<tr>
+		  		<td>
+					<a href="#" id="saveInfo" class="easyui-linkbutton" iconCls="icon-add">保存</a>
+					<a href="#" id="updateInfo" class="easyui-linkbutton" iconCls="icon-edit">修改</a> 
+	                <a href="#" id="closeUserDialog" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+				</td>
+	        </tr>
+      </table>
+	  </div>
+</div>
+</body>
+</html>

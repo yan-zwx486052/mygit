@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>添加操作</title>
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery.easyui.min.js"></script>
+<script type="text/javascript" src="js/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript" src="js/jquery.edatagrid.js"></script>
+<script type="text/javascript" src="js/gnif.js"></script>
+<script type="text/javascript" src="js/stu.js"></script>
+</head>
+<body>
+	<div id="dlg" class="easyui-dialog" style="width:400px;height:280px;padding:10px 20px"
+		closed="true" buttons="#dlg-buttons">
+	<div class="ftitle">学生信息</div>
+	<form id="fm" method="post">
+		<div class="fitem">
+			<label>姓名:</label>
+			<input name="name" class="easyui-validatebox" required="true">
+		</div>
+		<div class="fitem">
+			<label>电话:</label>
+			<input name="phone">
+		</div>
+	</form>
+</div>
+<div id="dlg-buttons">
+	<a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveStu()">保存</a>
+	<a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+</div>
+</body>
+</html>

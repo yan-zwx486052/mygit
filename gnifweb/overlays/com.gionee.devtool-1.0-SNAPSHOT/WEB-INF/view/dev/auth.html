@@ -1,0 +1,346 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>授权</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+	<div class="easyui-layout" data-options="fit:true" style="">
+	  <div data-options="region:'west',border:false" style="width:200px;padding:10px;">
+        <ul id="orgs${rand}"/>
+	  </div>
+	  <div data-options="region:'center',border:false" style="">
+		<div id="orgtab${rand}" class="easyui-tabs" data-options="fit:true,border:false,plain:true">
+		  <div title="子机构" data-options="fit:true" style="padding:10px;">
+			<table id="suborgs${rand}"></table>
+          </div>
+		  <div title="用户" data-options="fit:true" style="padding:10px;">
+			<table id="users${rand}"></table>
+          </div>
+		  <div title="用户组" data-options="fit:true" style="padding:10px;">
+			<div class="easyui-layout" data-options="fit:true" style="">
+			  <div data-options="region:'east',border:false" style="width:200px;padding:10px;">
+				<ul id="res${rand}"></ul>
+			  </div>
+			  <div data-options="region:'center',border:false" style="">
+		  		<table id="groups${rand}"></table>
+			  </div>
+			</div>
+          </div>
+		  <div title="权限组" data-options="fit:true" style="padding:10px;">
+		  	<div class="easyui-layout" data-options="fit:true" style="">
+			  <div data-options="region:'east',border:false" style="width:350px;padding:10px;">
+				<table id="pris${rand}" class="easyui-propertygrid" style="width:300px" data-options="
+			                url:'dev/auth/group_pri_property.json',
+			                method:'get',
+			                showGroup:true,
+			                scrollbarSize:0
+			            ">
+			    </table>
+			  </div>
+			  <div data-options="region:'center',border:false" style="">
+		  		<table id="pri_groups${rand}"></table>
+			  </div>
+			</div>
+          </div>
+		</div>
+	  </div>
+	</div>
+	<script type="text/javascript">
+$(function() {
+  var orgs = $('#orgs${rand}');
+  var suborgs = $('#suborgs${rand}');
+  var tab = $('#orgtab${rand}');
+  var users = $('#users${rand}');
+  var groups = $('#groups${rand}');
+  var pri_groups = $('#pri_groups${rand}');
+  var pris_table = $('#pris${rand}');
+  var res = $('#res${rand}');
+
+  var currentGroupId = 0;
+  var currentOrgId = 0;
+
+  function refreshOrg() {
+	var node = orgs.tree('find', currentOrgId);
+	orgs.tree('append', {
+	  parent: node.target,
+	  data: [{text:'加载中...'}]
+	});
+	orgs.tree('reload', node.target);
+  }
+
+  function createUrl(url) {
+	return 'dev/auth/' + url;
+  }
+  function showTab() {
+	var t = tab.tabs('getSelected');
+	var index = tab.tabs('getTabIndex', t);
+	switch (index) {
+	case 0:
+	  suborgs.edatagrid({
+		url: createUrl('suborgs.json?id=' + currentOrgId),
+		fit: true,
+		idField: 'id',
+		columns: [[
+		  {field:'id',checkbox:true},
+		  {field:'name',title:'名称',width:100,editor:{type:'validatebox',options:{required:true}}},
+		  {field:'fullName',title:'全称',width:200,editor:{type:'text'}},
+		  {field:'address',title:'地址',width:200,editor:{type:'text'}},
+		  {field:'telephone',title:'电话',width:100,editor:{type:'text'}}
+		]],
+		saveUrl: createUrl('save_org.json'),
+		updateUrl: createUrl('update_org.json'),
+		destroyUrl: createUrl('delete_org.json'),
+		onAdd: function(index, row) {
+		  row.pid = currentOrgId;
+		},
+		onSave: function(index,row) {refreshOrg();},
+		onDestroy: function(index,row) {refreshOrg();},
+		onError: function(index,data) {$.messager.alert('错误', data.message)},
+		toolbar: [
+		  {text:'新增',iconCls:'icon-add',handler:function(){suborgs.edatagrid('addRow');}},
+		  {text:'保存',iconCls:'icon-ok',handler:function(){suborgs.edatagrid('saveRow');}},
+		  {text:'取消',iconCls:'icon-cancel',handler:function(){suborgs.edatagrid('cancelRow');}},
+		  {text:'删除',iconCls:'icon-remove',handler:function(){suborgs.edatagrid('destroyRow');}},
+		]
+	  });
+	  break;
+	case 1:
+	  users.edatagrid({
+		url: createUrl('users.json?id=' + currentOrgId),
+		fit: true,
+		idField: 'id',
+		columns: [[
+		  {field:'id',checkbox:true},
+		  {field:'account',title:'帐号',width:100,editor:{type:'validatebox',options:{required:true}}},
+		  {field:'name',title:'姓名',width:100,editor:{type:'validatebox',options:{required:true}}},
+		  {field:'groups',title:'用户组',width:400,editor:{type:'combobox',options:{
+			data:groups.edatagrid('getRows'),
+			valueField:'id',
+			textField:'name',
+			multiple:true
+		  }},
+		  formatter:function(value,row,index){
+			if (value) {
+			  var values = value.split(",");
+			  var rows = groups.edatagrid('getRows');
+			  var show = [];
+			  var i,j;
+			  for (i=0; i<rows.length; i++) {
+				for (j=0; j<values.length; j++) {
+				  if (values[j] == rows[i].id) {
+					show.push(rows[i].name);
+					break;
+				  }
+				}
+			  }
+			  return show.join(',');
+			}
+			else {
+			  return "";
+			}
+		  }},
+		  {field:'priGroupId',title:'特权组',width:200,editor:{type:'combobox',options:{
+				data:pri_groups.edatagrid('getRows'),
+				valueField:'id',
+				textField:'name',
+				multiple:true
+			  }},
+			  formatter:function(value,row,index){
+				if (value) {
+				  var rows = pri_groups.edatagrid('getRows');
+				  var show = [];
+				  var i,j;
+				  for (i=0; i<rows.length; i++) {
+					  if (value == rows[i].id) {
+							return rows[i].name;
+					  }
+				  }
+				  return show.join(',');
+				}
+				return value;
+		  }},
+		  {field:'orgId',title:'机构',width:100},
+		  {field:'type',title:'系统来源',width:100},
+		  {field:'status',title:'状态',width:100}
+		]],
+		saveUrl: createUrl('save_user.json'),
+		updateUrl: createUrl('update_user.json'),
+		destroyUrl: createUrl('delete_user.json'),
+		onAdd: function(index, row) {
+		  row.orgId = currentOrgId;
+		},
+		onError: function(index,data) {$.messager.alert('错误', data.message)},
+		toolbar: [
+		  {text:'新增',iconCls:'icon-add',handler:function(){users.edatagrid('addRow');}},
+		  {text:'保存',iconCls:'icon-ok',handler:function(){users.edatagrid('saveRow');}},
+		  {text:'取消',iconCls:'icon-cancel',handler:function(){users.edatagrid('cancelRow');}},
+		  {text:'删除',iconCls:'icon-remove',handler:function(){users.edatagrid('destroyRow');}},
+		]
+	  });
+	  break;
+	}
+  }
+
+  groups.edatagrid({
+	url: createUrl('groups.json'),
+	fit: true,
+	singleSelect: true,
+	idField: 'id',
+	columns: [[
+	  {field:'id',checkbox:true},
+	  {field:'name',title:'名称',width:100,editor:{type:'validatebox',options:{required:true}}},
+	  {field:'description',title:'描述',width:400,editor:{type:'text'}},
+	]],
+	saveUrl: createUrl('save_group.json'),
+	updateUrl: createUrl('update_group.json'),
+	destroyUrl: createUrl('delete_group.json'),
+	onError: function(index,data) {$.messager.alert('错误', data.message)},
+	toolbar: [
+	  {text:'新增',iconCls:'icon-add',handler:function(){groups.edatagrid('addRow');}},
+	  {text:'保存',iconCls:'icon-ok',handler:function(){groups.edatagrid('saveRow');}},
+	  {text:'取消',iconCls:'icon-cancel',handler:function(){groups.edatagrid('cancelRow');}},
+	  {text:'删除',iconCls:'icon-remove',handler:function(){groups.edatagrid('destroyRow');}},
+	  {text:'保存权限',iconCls:'icon-remove',handler:function(){
+		var nodes = res.tree('getChecked');
+		var resources = [];
+		$.each(nodes, function(i, d) {
+		  resources.push(d.id);
+		});
+		if (resources.length > 0 && currentGroupId != 0) {
+		  $.post(createUrl('save_groupres.json'), {groupId: currentGroupId, resIds: resources.join(',')}, function(data) {
+			if (typeof(data.success) == "boolean" && !data.success) {
+			  $.messager.alert('错误', data.message);
+			}
+			else {
+			  $.messager.show({
+				title:'提示',
+				msg:'设置权限成功'
+			  });
+			}
+		  });
+		}
+	  }}
+	],
+	onSelect: function(index, row) {
+	  var nodes = res.tree('getChecked');
+	  currentGroupId = row.id;
+	  $.each(nodes, function(i, d) {
+		res.tree('uncheck', d.target);
+	  });
+	  $.post(createUrl('groupres.json'), {id: row.id}, function(data) {
+		$.each(data, function(i, d) {
+		  var n = res.tree('find', d);
+		  if (n) {
+			res.tree('check', n.target);
+		  }
+		});
+	  });
+	}
+  });
+
+  pri_groups.edatagrid({
+	url: createUrl('pri_groups.json'),
+	fit: true,
+	singleSelect: true,
+	idField: 'id',
+	columns: [[
+	  {field:'id',checkbox:true},
+	  {field:'name',title:'名称',width:100,editor:{type:'validatebox',options:{required:true}}},
+	  {field:'description',title:'描述',width:400,editor:{type:'text'}}
+	]],
+	saveUrl: createUrl('save_pri_group.json'),
+	updateUrl: createUrl('update_pri_group.json'),
+	destroyUrl: createUrl('del_pri_group.json'),
+	onError: function(index,data) {$.messager.alert('错误', data.message)},
+	toolbar: [
+	  {text:'新增',iconCls:'icon-add',handler:function(){pri_groups.edatagrid('addRow');}},
+	  {text:'保存',iconCls:'icon-ok',handler:function(){pri_groups.edatagrid('saveRow');}},
+	  {text:'取消',iconCls:'icon-cancel',handler:function(){pri_groups.edatagrid('cancelRow');}},
+	  {text:'删除',iconCls:'icon-remove',handler:function(){pri_groups.edatagrid('destroyRow');}},
+	  {text:'保存权限',iconCls:'icon-remove',handler:function(){
+		if(pris_table.propertygrid("getChanges") != '') {
+			var row = pri_groups.datagrid('getSelected');
+			if(!row) {
+				$.messager.show({
+					title:'提示',
+					msg:'请选择一行特权组'
+				  });
+			}
+			var jsonObject = {};
+			jsonObject.priGroupId = row.id;
+			jsonObject.priResps = [];
+			$.each(pris_table.propertygrid("getRows"),function(index,data){
+				if(data.value && data.value != null && data.value != '') {
+				  jsonObject['priResps['+index+'].priGroupId'] = row.id;
+				  jsonObject['priResps['+index+'].priKey'] = data.key;
+				  jsonObject['priResps['+index+'].priValue'] = data.value;
+				}
+			});
+			
+			$.post(createUrl('sav_privileges.json'), jsonObject, function(data) {
+				if (typeof(data.success) == "boolean" && !data.success) {
+				  $.messager.alert('错误', data.message);
+				}
+				else {
+				  $.messager.show({
+					title:'提示',
+					msg:'设置权限成功'
+				  });
+				}
+			  });
+		} else {
+			$.messager.show({
+				title:'提示',
+				msg:'未进行修改无需保存'
+			  });
+		}
+	  }}
+	],
+	onSelect: function(index, row) {
+		if(row.id) {
+			pris_table.propertygrid('reload',{priGroupId:row.id});
+		}
+	}
+  });
+
+  res.tree({
+	url: createUrl('res.json'),
+	cascadeCheck:false,
+	checkbox:true,
+  });
+
+  tab.tabs({
+	onSelect: function(title, index) {
+	  showTab();
+	}
+  });
+
+  orgs.tree({
+	url: createUrl('orgs.json'),
+	onClick: function(node) {
+	  currentOrgId = node.id;
+	  showTab();
+	},
+	dnd: true,
+	onDrop: function(target,source,point) {
+	  var pid;
+	  if (point == 'append') {
+		pid = res.tree('getNode', target).id;
+	  }
+	  else {
+		pid = res.tree('getParent', target).id;
+	  }
+	  $.post(createUrl('update_org.json'), {id: source.id, pid: pid});
+	},
+  });
+});
+	</script>
+  </body>
+</html>

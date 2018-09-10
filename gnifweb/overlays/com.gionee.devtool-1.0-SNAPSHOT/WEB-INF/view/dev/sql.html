@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>授权</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+<#macro showsql res>
+<#list res as r>
+insert into auth_resource (id, pid, type, name, code, index_, action, url, icon, status) values (${r.id?c}, ${r.pid?c}, ${r.type?c}, '${r.name!""}', '${r.code!""}', ${r.index!"0"}, '${r.action!""}', '${r.url!""}', '${r.icon!""}', ${r.status!0});
+  <@showsql r.children />
+</#list>
+</#macro>
+<textarea style="width:100%;height:100%;padding:10px;border:0;" wrap="off" readonly="true">
+<@showsql res />
+</textarea>
+  </body>
+</html>

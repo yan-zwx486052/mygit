@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <base href="${base}"></base>
+    <meta charset="utf-8"/>
+    <title>开发工具</title>
+    <link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+    <link rel="stylesheet" type="text/css" href="dev/css/themes/icon.css"/>
+    <link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+    <script type="text/javascript" src="dev/js/jquery.min.js"></script>
+    <script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.edatagrid.js"></script>
+    <script type="text/javascript" src="dev/js/main.js"></script>
+    <!-- fseditor -->
+    <link rel="stylesheet" type="text/css" href="dev/js/editor/fseditor.css"/>
+    <script type="text/javascript" src="dev/js/editor/jquery.fseditor-min.js"></script>
+    
+  </head>
+  <body class="easyui-layout">
+    <div data-options="region:'north',border:false" style="height:30px;background:#eeeeff;">
+    </div>
+    <div data-options="region:'west',border:false,split:true,title:'操作菜单'" style="width:200px;margin-left:10px;" id="itsm-menu">
+      <ul id="menu" class="easyui-tree">
+        <li><span>开发流程</span>
+          <ul>
+			<li><span><a turl="dev/model.html">业务对象</a></span></li>
+			<li><span><a turl="dev/field.html">对象明细</a></span></li>
+            <li><span><a turl="dev/func.html">功能模块</a></span></li>
+            <li><span><a turl="dev/privi.html">特权定义</a></span></li>
+            <li><span><a turl="dev/auth.html">用户授权</a></span></li>
+            <li><span><a turl="dev/dbrun.html">数据库管理</a></span></li>
+            <li><span><a turl="dev/sql.html">初始化SQL</a></span></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div data-options="region:'center',border:false" style="">
+      <div id="tt" class="easyui-tabs" data-options="fit:true,border:false,plain:true">
+        <div title="首页" data-options="closable:true,fit:true" href="dev/intro.html">
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

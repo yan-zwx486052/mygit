@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:cache="http://www.springframework.org/schema/cache"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://www.springframework.org/schema/tx
+            http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+			http://www.springframework.org/schema/cache
+			http://www.springframework.org/schema/cache/spring-cache.xsd
+			http://www.springframework.org/schema/task
+			http://www.springframework.org/schema/task/spring-task-3.0.xsd
+			http://www.springframework.org/schema/p
+			http://www.springframework.org/schema/p/spring-p-3.0.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+  <!-- 引入配置文件：方便我们在一个阶段内不需要频繁书写一个参数的值，而在不同阶段间又可以方便的切换参数配置信息 -->
+  <context:property-placeholder location="classpath:app.properties"/>
+  <!-- 设置自动扫描包 -->
+  <!-- 添加自己的和service实现类 不能添加controller，因为要实现层间的分离-->
+  <context:component-scan base-package="com.gionee.gnifweb.biz.service.impl,com.gionee.gnifweb.integration.dao,com.gionee.devtool.biz.service.impl,com.gionee.auth.impl"/>
+  <!-- 启用缓存注解功能，这个是必须的，否则注解不会生效，另外，该注解一定要声明在spring主配置文件中才会生效 --> 
+  <cache:annotation-driven cache-manager="cacheManager"/>
+
+  <!-- 声明cacheManager（缓存注解） -->  
+  <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+	<property name="cacheManager">
+	  <bean class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+		<property name="configLocation" value="/WEB-INF/ehcache.xml" />
+	  </bean>
+	</property>
+  </bean>
+  
+  <!-- 启用annotation方式进行任务调度 --> 
+  <task:annotation-driven executor="gnifExecutor" scheduler="gnifScheduler"/>
+  <!-- 配置任务线性池 -->
+  <task:executor id="gnifExecutor" pool-size="5"/>
+  <task:scheduler id="gnifScheduler" pool-size="10"/>
+  
+  <!-- 定义任务管理器 -->
+  <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+	<property name="dataSource" ref="dbcp" />
+  </bean>
+  <!-- 开启事务 -->
+  <tx:annotation-driven transaction-manager="transactionManager"/>
+
+  <!-- 用于在实现 Service 的时候进行数据校验 -->
+  <bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+	<property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+  </bean>
+
+	<!-- 配置数据源 -->
+  <bean id="dbcp" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="${jdbc.driverClassName}" />
+    <property name="url" value="${jdbc.url}" />
+    <property name="username" value="${jdbc.username}" />
+    <property name="password" value="${jdbc.password}" />
+	<property name="testWhileIdle" value="true" />
+	<property name="validationQuery" value="select 1" />
+	<property name="minEvictableIdleTimeMillis" value="1800000" />
+	<property name="removeAbandonedTimeout" value="180" />
+	<property name="removeAbandoned" value="true" />
+  </bean>
+
+  <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
+  <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="configLocation" value="/WEB-INF/mybatis-config.xml" />
+	<property name="dataSource" ref="dbcp" />
+	<!-- 添加自己的model层包 -->
+	<property name="typeAliasesPackage" value="com.gionee.gnifweb.biz.model" />
+  </bean>
+
+  <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+  	<!-- 添加自己的dao层包 -->
+	<property name="basePackage" value="com.gionee.gnifweb.integration.dao" />
+  </bean>
+
+</beans>

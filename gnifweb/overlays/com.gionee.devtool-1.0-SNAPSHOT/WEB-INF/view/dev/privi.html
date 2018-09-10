@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>特殊权限</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+	<div class="easyui-layout" data-options="fit:true" style="">
+	  <div data-options="region:'west',border:false" style="width:200px;padding:10px;">
+        <ul id="pri_define_p${rand}"/>
+	  </div>
+	  <div data-options="region:'center',border:false" style="">
+	  	 <table id="pri_define${rand}"></table>
+	  </div>
+	</div>
+	<script type="text/javascript">
+  var currentPriDefineId = 0;
+  var pd = $('#pri_define_p${rand}');
+  var define = $('#pri_define${rand}');
+  var types = [{text:'字符类型',value:'0'},{text:'数值类型',value:'1'},{text:'时间类型',value:'2'},{text:'下拉框',value:'3'},{text:'选择框',value:'4'}];
+  var getType = function(value, row, index) {
+	if (!value) {
+	  // add new resource
+	  row.priType = '0';
+	  value = '0';
+	}
+	return types[value].text;
+  }
+  function refreshPriTree() {
+	pd.tree('reload');
+  }
+
+  function createUrl(url) {
+	return 'privilege/' + url;
+  }
+
+  function showGrid() {
+	var columns_def = [];
+	if (currentPriDefineId == 0 ) {
+		columns_def = [[
+				{field:'id',checkbox:true},
+				{field:'pid',hidden:true},
+				{field:'name',title:'名称',width:100,editor:{type:'validatebox',options:{required:true}}},
+				{field:'pindex',title:'排序',width:100,editor:{type:'numberbox'}}
+		]];
+	} else {
+		columns_def = [[
+				{field:'id',checkbox:true},
+				{field:'pid',hidden:true},
+				{field:'name',title:'名称',width:100,editor:{type:'validatebox',options:{required:true}}},
+				{field:'priKey',title:'键',width:100,editor:{type:'validatebox',options:{required:true}}},
+				{field:'defValue',title:'默认值',width:100,editor:{type:'text'}},
+				{field:'pindex',title:'排序',width:100,editor:{type:'numberbox'}},
+				{field:'priType',title:'输入域类型',width:100,editor:{type:'combobox',options:{data:types}},formatter:getType},
+				{field:'description',title:'定义描述',width:150,editor:{type:'text'}},
+				{field:'detail',title:'输入域定义',width:150,editor:{type:'text'}}
+		]];
+	}
+	define.edatagrid({
+			url: createUrl('pri_define.json?id=' + currentPriDefineId),
+			fit: true,
+			idField: 'id',
+			columns: columns_def,
+			saveUrl: createUrl('save_pri_define.json'),
+			updateUrl: createUrl('update_pri_define.json'),
+			destroyUrl: createUrl('delete_pri_define.json'),
+			onAdd: function(index, row) {
+			  row.pid = currentPriDefineId;
+			},
+			onSave: function(index,row) {refreshPriTree();},
+			onDestroy: function(index,row) {refreshPriTree();},
+			onError: function(index,data) {$.messager.alert('错误', data.message)},
+			toolbar: [
+			  {text:'新增',iconCls:'icon-add',handler:function(){define.edatagrid('addRow');}},
+			  {text:'保存',iconCls:'icon-ok',handler:function(){define.edatagrid('saveRow');}},
+			  {text:'取消',iconCls:'icon-cancel',handler:function(){define.edatagrid('cancelRow');}},
+			  {text:'删除',iconCls:'icon-remove',handler:function(){define.edatagrid('destroyRow');}}
+			]
+	});
+  }
+  $(function() {
+	  pd.tree({
+		url: createUrl('pri_define_p.json'),
+		formatter: function(node) {
+		  return node.name;
+		},
+		onClick: function(node) {
+		  currentPriDefineId = node.id;
+		  showGrid();
+		},
+		dnd: true
+	  });
+  });
+
+	</script>
+  </body>
+</html>

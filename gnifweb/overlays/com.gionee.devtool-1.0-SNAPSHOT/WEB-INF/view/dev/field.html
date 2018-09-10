@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>开发工具</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+	<div class="easyui-layout" data-options="fit:true" style="">
+	  <div data-options="region:'north',border:false" style="height:40px;padding:10px;">
+		<div class="sitem">实体对象：<input type="text" id="models${rand}"/></div>
+		<div class="sitem" id="gendoc${rand}" style="display:none;">生成DAO方法：<input type="text" id="gendo${rand}"/></div>
+		<div class="sitem" id="gensoc${rand}" style="display:none;">生成Service方法：<input type="text" id="genso${rand}"/></div>
+	  </div>
+	  <div data-options="region:'center',border:false" style="padding:10px;">
+		<table id="fields${rand}"></table>
+	  </div>
+	</div>
+	<script type="text/javascript">
+$(function() {
+  var models = $('#models${rand}');
+  var fields = $('#fields${rand}');
+  var gendo = $('#gendo${rand}');
+  var genso = $('#genso${rand}');
+  var gendoc = $('#gendoc${rand}');
+  var gensoc = $('#gensoc${rand}');
+
+  var genValid = false;
+
+  emsg.on('modelChange', '#models${rand}', function() {
+	models.combobox('reload');
+  });
+
+  function generateCode(codeType, param) {
+	$.post('dev/generate_'+codeType+'.json', param, function(result) {
+	  if (result.success) {
+		$.messager.show({
+		  title:'提示',
+		  msg:'生成代码成功'
+		});
+	  }
+	  else {
+		$.messager.alert('错误', '生成代码错误');
+	  }
+	});
+  }
+
+  function capfirst(str) {
+	return str.substring(0,1).toUpperCase() + str.substring(1);
+  }
+  
+  gendo.combobox({
+	data: [
+	  {text: 'insert', value: 'insert'},
+	  {text: 'update', value: 'update'},
+	  {text: 'delete', value: 'delete'},
+	  {text: 'getAll', value: 'getAll'},
+	  {text: 'getPage', value: 'getPage'},
+	  {text: 'get', value: 'get'}
+	],
+	onSelect: function(row) {
+	  if (row.value == 'getAll' || row.value == 'getPage' || row.value == 'get') {
+		var rows = fields.datagrid('getSelections');
+		if (rows.length > 0) {
+		  $.messager.confirm('确认生成代码', '将要生成 dao.' + row.value + 'By' + capfirst(rows[0].javaName) + '方法，是否确认？', function(t) {
+			if (t) {
+			  var param = {};
+			  param.id = models.combo('getValue');
+			  param.method = row.value;
+			  param.args = rows[0].javaName;
+			  generateCode('dao', param);
+			}
+		  });
+		  return;
+		}
+	  }
+	  $.messager.confirm('确认生成代码', '将要生成 dao.' + row.value + '方法，是否确认？', function(t) {
+		if (t) {
+		  var param = {};
+		  param.id = models.combo('getValue');
+		  param.method = row.value;
+		  generateCode('dao', param);
+		}
+	  });
+	}
+  });
+
+  genso.combobox({
+	data: [
+	  {text: '保存(save)', value: 'save'},
+	  {text: '通过ID获取对象(get)', value: 'get'},
+	  {text: '物理删除(delete)', value: 'delete'},
+	  {text: '逻辑删除(delete)', value: 'ldelete'},
+	  {text: '查询(query)', value: 'query'},
+	  {text: '分页查询(queryPage)', value: 'page'}
+	],
+	onSelect: function(row) {
+	  $.messager.confirm('确认生成代码', '将要生成 service.' + row.value + ' 方法，是否确认？', function(t) {
+		if (t) {
+		  var param = {};
+		  param.id = models.combo('getValue');
+		  param.method = row.value;
+		  generateCode('service', param);
+		}
+	  });
+	}
+  });
+  
+  models.combobox({
+	url: 'dev/models.json',
+	valueField: 'id',
+	textField: 'name',
+	onSelect: function(row) {
+	  fields.edatagrid({
+		fit: true,
+		rownumbers: true,
+		columns: [[
+		  {field:'id',checkbox:true},
+		  {field:'modelId',hidden:true},
+		  {field:'name',title:'名称',width:100,editor:{type:'validatebox',options:{required:true}}},
+		  {field:'javaType',title:'Java字段类型',width:150,editor:{type:'validatebox'}},
+		  {field:'javaName',title:'Java字段名',width:150,editor:{type:'validatebox'}},
+		  {field:'dbName',title:'数据库字段名',width:150,editor:{type:'validatebox'}},
+		  {field:'dbType',title:'数据库字段类型',width:150,editor:{type:'validatebox'}}
+		]],
+		idField: 'id',
+		url: 'dev/fields.json?id=' + row.id,
+		saveUrl: 'dev/save_field.json',
+		updateUrl: 'dev/update_field.json',
+		destroyUrl: 'dev/delete_field.json',
+		onAdd: function(index, row) {
+		  row.modelId = models.combobox('getValue');
+		},
+		toolbar: [
+		  {text:'新增',iconCls:'icon-add',handler:function(){fields.edatagrid('addRow');}},
+		  {text:'保存',iconCls:'icon-ok',handler:function(){fields.edatagrid('saveRow');}},
+		  {text:'取消',iconCls:'icon-cancel',handler:function(){fields.edatagrid('cancelRow');}},
+		  {text:'删除',iconCls:'icon-remove',handler:function(){fields.edatagrid('destroyRow');}},
+		  '-',
+		  {text:'生成实体类',handler:function(){
+			$.messager.confirm('确认生成代码', '将要生成该对象的实体类，是否确认？', function(t) {
+			  var param = {};
+			  param.id = models.combo('getValue');
+			  generateCode('bo', param);
+			});
+		  }},
+		  {text:'生成响应类',handler:function(){
+			var param = {};
+			param.ids = [];
+			var ids = fields.datagrid('getSelections');
+			if (ids.length == 0) {
+			  $.messager.alert('提示', '请选择Response类所需要的字段！');
+			  return;
+			}
+			$.messager.confirm('确认生成代码', '将要针对所选字段生成 Response 类，是否确认？', function(t) {
+			  $.each(fields.datagrid('getSelections'), function(i, d){
+				param.ids.push(d.id);
+			  });
+			  param.ids = param.ids.join(',');
+			  param.id = models.combo('getValue');
+			  generateCode('ro', param);
+			});
+		  }}
+		]
+	  });
+	  if (!genValid) {
+		gendoc.show();
+		gensoc.show();
+		genValid = true;
+	  }
+	}
+  });
+});
+	</script>
+  </body>
+</html>

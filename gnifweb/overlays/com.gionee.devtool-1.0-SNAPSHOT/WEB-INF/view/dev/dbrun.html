@@ -1,0 +1,387 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>开发工具</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+	<div class="easyui-layout" data-options="fit:true,border:false" style="">
+	  <div id="west${rand}" data-options="region:'west',border:true,title:'数据库表信息',split:true,
+	  		tools: [{
+        		iconCls:'icon-reload',
+        		handler: relaod_Tree${rand}
+    	}]" style="width:200px;padding:10px;">
+		<ul id="table${rand}"></ul>
+	  </div>
+	  <div data-options="region:'center',border:false,split:true">
+	  		<div id="centerLayout${rand}" class="easyui-layout" data-options="fit:true" style="">
+	  			<div id="centerTop${rand}" data-options="region:'center',border:true,title:'数据库表数据',split:true">
+	  				<table id="center${rand}"></table>
+	  			</div>
+	  			<div id="centerSouth${rand}" data-options="region:'south',border:true,title:'数据库表结构',height:300,split:true,collapsed:true,tools: [{
+		        		iconCls:'icon-reload',
+		        		handler: relaod_south${rand}
+		    			}]">
+	  				<table id="config${rand}"></table>
+	  			</div>
+	  		</div>
+	  </div>
+	  <div id="importWin${rand}"></div>
+	  <div id="sqlRun${rand}">
+	  	<div id="winLayout${rand}" class="easyui-layout" data-options="fit:true" style="">
+		  <div id="sqlRunNorth${rand}" data-options="region:'north',border:false,split:true,height:300" style="padding:10px;">
+			<textarea id="sqlTextArea${rand}" style="border:0;width:100%;min-height: 260px;resize:none">
+			</textarea>
+		  </div>
+		  <div id="sqlCenterPanel${rand}" data-options="region:'center',border:false,split:true">
+		  		<table id="sqlRunCenter${rand}"></table>
+		  </div>
+		</div>
+	  </div>
+	</div>
+	<script type="text/javascript">
+$(function() {
+  var tbTree = $('#table${rand}');
+  var westPanel = $('#west${rand}');
+  
+  var center = $('#center${rand}');
+  var south  = $('#config${rand}');
+  
+  var centerLayout = $('#centerLayout${rand}');
+  
+  var importWin = $('#importWin${rand}');
+  
+  var sqlRunWin = $('#sqlRun${rand}');
+  
+  var sqlCenterPanel= $('#sqlCenterPanel${rand}');
+  
+  var sqlTextArea = $('#sqlTextArea${rand}');
+  
+  sqlTextArea.fseditor({
+  	overlay:true,
+  	placeholder:'请输入需要运行的SQL语句',
+  	transition:'fade',
+  	expandOnFocus:false
+  });
+  
+  var sqlRunCenter = $('#sqlRunCenter${rand}');
+  
+  var columnHeader = null;
+  
+  //Define Combo Data
+  var pkTypes = [{text:'true',value:'true'},{text:'false',value:'false'}];
+  var isNullTypes = [{text:'true',value:'true'},{text:'false',value:'false'}];
+  var columnTypes = [{text:'int',value:'int'},{text:'bigint',value:'bigint'},
+  					 {text:'binary',value:'binary'},{text:'bit',value:'bit'},
+  					 {text:'char',value:'char'},{text:'datetime',value:'datetime'},
+  					 {text:'decimal',value:'decimal'},{text:'float',value:'float'},
+  					 {text:'money',value:'money'},{text:'nchar',value:'nchar'},
+  					 {text:'ntext',value:'ntext'},{text:'numeric',value:'numeric'},
+  					 {text:'nvarchar',value:'nvarchar'},{text:'text',value:'text'},
+  					 {text:'tinyint',value:'tinyint'},{text:'varchar',value:'varchar'}
+  					];
+  
+  var refreshGridData = function(){
+  	center.edatagrid('reload');
+  }
+  var clearSelection = function(){
+  	center.edatagrid('clearSelections');
+  }
+  //删除 
+  var deleteCenterGridRow = function(url,row){
+  		//console.log(url);
+  		//console.log(row);
+  		$.post(url, row, function(data){
+			 $.messager.show({
+                title:'信息提示',
+                msg:data.message
+          	});
+          	refreshGridData();
+          	//清除选择
+          	clearSelection();
+ 		}, 'json');
+  }
+  
+  //导入文件
+  var importData = function(tablename){
+  		importWin.dialog({
+		    title: '数据库表Excel导入',
+		    width: 400,
+		    height: 100,
+		    closed: false,
+		    cache: false,
+		    content:'<form id="uploadForm${rand}" method="post" enctype="multipart/form-data">'
+		    	+'<div style="padding:10px;"><input name="file" type="file" style="width:200px" id="file"/>'
+		    	+'<input id="upload_btn" type="hidden" value="'+tablename+'" name="tableName"/>'
+		    	+'<input id="upload_btn" type="button" value="Import" onclick="return ajaxFileUpload${rand}();"/>'
+		    	+'</div></form>',
+		    modal: true
+		});
+  }
+  
+  //导出文件
+  var exportData = function(tablename){
+	 $.messager.confirm('Confirm', '确定要导出表格数据吗?', function(r){
+		if (r){
+			var form = $("<form>");
+			form.attr('style', 'display:none');
+			form.attr('method', 'post');
+			form.attr('action', 'dev/exportTableData.html');
+			
+			var table_Name = $('<input>');
+			table_Name.attr('type', 'hidden');
+			table_Name.attr('name', 'tableName');
+			table_Name.attr('value', tablename);
+				
+			$('body').append(form);
+			form.append(table_Name);
+				        
+			form.submit();
+			form.remove();
+		}
+	});
+  }
+  
+  //显示SQL执行窗口
+  var showSQLRunPanel = function(){
+  	sqlRunWin.dialog({
+  		title:'SQL执行',
+	    width:1100,
+	    height:600,
+	    modal:true,
+	    maximizable:true,
+	    resizable:true,
+	    toolbar: [
+	    	{text:'运行',iconCls:'icon-ok',handler:function(){
+	    		var sql = $(".fs-editable").html();
+	    		if (sql != null && sql.length > 0) {
+	    			runSQL(sql);
+	    		} else {
+	    			$.messager.alert('信息提示','请输入要执行的sql语句!');
+	    		}
+	    		
+	    	}},
+	    	'-',
+	    	{text:'格式化',iconCls:'icon-edit',handler:function(){
+	    		var sql = $(".fs-editable").html();
+	    		if (sql != null && sql.length > 0) {
+	    			formatSQL(sql);
+	    		} else {
+	    			$.messager.alert('信息提示','请输入要格式化的sql语句!');
+	    		}
+	    	}}]
+	});
+  }
+  
+  var runSQL = function(sqltext){
+  	$.post("dev/runSql.json",
+			{sql:sqltext},
+			function(data) {
+				if(data.success){
+					if (data.columns) {
+						sqlCenterPanel.panel('open');
+						sqlRunCenter.edatagrid({
+				  		 	url: '',
+							fit: true,
+							border:false,
+							columns: new Array(data.columns),
+							idField: 'columnName',
+							rownumbers:true,
+							onBeforeLoad : function(){
+								//先删除所有行,
+								var cur_rows = sqlRunCenter.edatagrid("getRows");
+							    var copyRows = [];
+							        for ( var j= 0; j < cur_rows.length; j++) {
+							        copyRows.push(cur_rows[j]);
+							        						}
+							     for(var i =0;i<copyRows.length;i++){    
+							         var index = sqlRunCenter.edatagrid('getRowIndex',copyRows[i]);
+							         //deleteRow话刷新row的index
+							         sqlRunCenter.edatagrid('deleteRow',index); 
+							     }
+							    //循环所选的行
+								var rows = data.dataRows.rows;
+								for (var i=0;i<rows.length;i++) {
+									sqlRunCenter.edatagrid('appendRow',rows[i]);
+								}
+							}
+						});
+					} else {
+						sqlCenterPanel.panel('close');
+						$.messager.show({
+		                	title:'信息提示',
+		                	msg:'执行SQL成功'
+		          		});
+					}
+				} else {
+					$.messager.alert('信息提示',data.message);
+				}
+			},
+			"json"
+		);
+  }
+  
+  //格式化SQL
+   var formatSQL = function(sqltext){
+  	$.post("dev/formatSql.json",
+			{sql:sqltext},
+			function(data) {
+				if(data.success){
+					$(".fs-editable").html(data.message);
+					 $.messager.show({
+		                title:'信息提示',
+		                msg:'格式化SQL成功'
+		          	});
+				} else {
+					$.messager.alert('信息提示',data.message);
+				}
+			},
+			"json"
+		);
+  }
+  
+  //展开中间的south panel
+  var expandSouthPanel = function(tableName){
+  		 south.edatagrid({
+  		 	url: 'dev/tableSkeletonData.json?tableName=' + tableName,
+			fit: true,
+			border:false,
+			columns: [[
+					{field:"columnName",checkbox:false,title:"列名",width:120,editor:{type:"text"}},
+					{field:"oldColumnName",checkbox:false,title:"列名",width:120, hidden : true, editor:{type:"text"}},
+					{field:"dataType","checkbox":false,title:"类型",width:120,editor:{type:"combobox",options:{data:columnTypes}}},
+					{field:"length","checkbox":false,title:"长度","width":120,editor:{type:"text"}},
+					{field:"isNull","checkbox":false,title:"是否为空","width":120,editor:{type:"combobox",options:{data:isNullTypes}}},
+					{field:"isPk","checkbox":false,title:"是否主键","width":120,editor:{type:"combobox",options:{data:pkTypes}}},
+				]],
+			idField: 'columnName',
+			rownumbers:true,
+			saveUrl: 'dev/addColumn.json?tableName=' + tableName,
+			updateUrl: 'dev/updateColumn.json?tableName=' + tableName,
+			destroyUrl: 'dev/deleteColumn.json?tableName=' + tableName,
+			onSave: function(index,row) {refreshGridData();},
+			onDestroy: function(index,row) {refreshGridData();},
+			onError: function(index,data) {$.messager.alert('错误', data.message)},
+			toolbar: [{text:'新增',iconCls:'icon-add',handler:function(){south.edatagrid('addRow');}},
+						  '-',
+						  {text:'保存',iconCls:'icon-ok',handler:function(){south.edatagrid('saveRow');}},
+						  '-',
+						  {text:'取消',iconCls:'icon-cancel',handler:function(){south.edatagrid('cancelRow');}},
+						  '-',
+						  {text:'删除',iconCls:'icon-remove',handler:function(){south.edatagrid('destroyRow');}}]
+		});
+		centerLayout.layout('expand','south');
+  }
+  
+  //设置panel的title
+  var setCenterTopPanelTitle = function(titleText){
+  	$('#centerTop${rand}').panel('setTitle', titleText);
+  }
+  
+  var setCenterSouthPanelTitle = function(titleText){
+  	$('#centerSouth${rand}').panel('setTitle',titleText);
+  }
+  
+  //table tree
+  tbTree.tree({
+	url:'dev/tables.json',
+	animate:true,
+	lines:true,
+	onClick: function(node) {
+		//设置panel的title
+		setCenterTopPanelTitle('数据库表<span style="color:red">['+ node.text +']</span>数据');
+	  	$.post("dev/getTableColumn.json",
+			{tableName:node.text},
+			function(data) {
+					  center.edatagrid({
+						url: 'dev/tableGridData.json?tableName=' + node.text,
+						fit: true,
+						border:false,
+						columns: new Array(data),
+						pagination:true,
+						rownumbers:true,
+						pageSize:20,
+						idField: data[0].field,
+						saveUrl: 'dev/saveTableRow.json?tableName=' + node.text,
+						updateUrl: 'dev/updateTableRow.json?tableName=' + node.text,
+						destroyUrl: 'dev/deleteTableRow.json?tableName=' + node.text,
+						onSave: function(index,row) {refreshGridData();},
+						onDestroy: function(index,row) {refreshGridData();},
+						onError: function(index,data) {$.messager.alert('错误', data.message)},
+						onLoadSuccess : function(data){
+							expandSouthPanel(node.text);
+							setCenterSouthPanelTitle('数据库表<span style="color:red">['+ node.text +']</span>结构');
+						},
+						toolbar: [
+						  {text:'新增',iconCls:'icon-add',handler:function(){center.edatagrid('addRow');}},
+						  '-',
+						  {text:'保存',iconCls:'icon-ok',handler:function(){center.edatagrid('saveRow');}},
+						  '-',
+						  {text:'取消',iconCls:'icon-cancel',handler:function(){center.edatagrid('cancelRow');}},
+						  '-',
+						  {text:'删除',iconCls:'icon-remove',handler:function(){
+						  		deleteCenterGridRow(center.edatagrid('options').destroyUrl,center.edatagrid('getSelected'));
+						  	}
+						  },
+						  '-',
+						  {text:'查看表结构',iconCls:'icon-edit',handler:function(){
+						  		expandSouthPanel(node.text);
+						  	}
+						  },
+						  '-',
+						  {text:'导入',iconCls:'icon-undo',handler:function(){importData(node.text);}},
+						  '-',
+						  {text:'导出',iconCls:'icon-redo',handler:function(){exportData(node.text);}},
+						  '-',
+						  {text:'Sql执行',iconCls:'icon-tip',handler:function(){
+						  		showSQLRunPanel();
+						  	}
+						  },
+						]
+					  });
+			},
+			"json"
+		);
+	}
+  });
+});  
+ //reload grid
+ var relaod_Tree${rand} = function (){
+ 	var tabTree = $('#table${rand}');
+	tabTree.tree('reload', tabTree.attr('url'));
+  }
+  
+ var relaod_south${rand} = function(){
+ 	var south  = $('#config${rand}');
+ 	south.datagrid("reload");
+ }
+  //update file
+  var ajaxFileUpload${rand} = function(){
+  	var tabTree = $('#table${rand}');
+  	var node = tabTree.tree("getSelected");
+  	$('#uploadForm${rand}').form('submit', {
+		url: "dev/importTableData.json",
+		success: function(data) {
+		  var result = JSON.parse(data);
+		  var center = $('#center${rand}');
+		  center.edatagrid('reload');
+		  //关闭win
+		  $('#importWin${rand}').dialog("close");
+		  //显示提示信息
+		  $.messager.show({
+                title:'信息提示',
+                msg:result.messageResponse.message
+          });
+	 }
+  });
+ }
+</script>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+  <head>
+	<base href="${base}"></base>
+	<meta charset="utf-8"/>
+	<title>开发工具</title>
+	<link rel="stylesheet" type="text/css" href="dev/css/themes/default/easyui.css"/>
+	<link rel="stylesheet" type="text/css" href="dev/css/main.css"/>
+	<script type="text/javascript" src="dev/js/jquery.min.js"></script>
+	<script type="text/javascript" src="dev/js/jquery.easyui.min.js"></script>
+	<script type="text/javascript" src="dev/js/locale/easyui-lang-zh_CN.js"></script>
+  </head>
+  <body>
+	<div class="easyui-layout" data-options="fit:true" style="">
+	  <div data-options="region:'north',border:false" style="height:50px;padding:10px;">
+		Hello,world
+	  </div>
+	  <div data-options="region:'center',border:false" style="padding:10px;">
+		<table id="bb"></table>
+	  </div>
+	</div>
+	<script type="text/javascript">
+$(function() {
+  var tb = $('#bb');
+  function add() {
+    console.log(tb.datagrid('getSelections'));
+	alert(tb.datagrid('getSelections').length);
+  }
+  tb.datagrid({
+	fit:true,
+	columns:[[
+	  {field:'code',title:'Code',width:100},
+	  {field:'name',title:'Name',width:100},
+	  {field:'price',title:'Price',width:100,align:'right'}
+	]],
+	data: [
+	  {code:'value11', name:'value12'},
+	  {code:'value21', name:'value22'}
+	],
+	toolbar: [{
+	  iconCls: 'icon-edit',
+	  handler: function(){alert('edit')}
+	},'-',{
+	  iconCls: 'icon-help',
+	  handler: function(){alert('help')}
+	},'-',{
+	  text: '显示',
+	  handler: add
+	}]
+  });
+});
+	</script>
+  </body>
+</html>
