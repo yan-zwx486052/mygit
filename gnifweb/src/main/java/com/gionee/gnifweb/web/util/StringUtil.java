@@ -39,4 +39,8 @@ public class StringUtil {
 			return null;
 		}
 	}
+	
+	public static void getValue() {
+		
+	}
 }
