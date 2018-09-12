@@ -34,14 +34,17 @@ import com.gionee.gnifweb.web.util.ResponseUtil;
 import net.sf.json.JSONObject;
 
 /**
- *  展现层
  * 
- * @author zhang
+ * @ClassName: StuController
+ * @Description: <展现层>
+ * @author 乐
+ * @date 2018年9月12日 下午11:15:05
  *
  */
 @Controller
 @RequestMapping("stu")
-public class StuController {
+public class StuController
+{
 	// 注入服务
 	@Autowired
 	private IStuService stuService;
@@ -68,12 +71,19 @@ public class StuController {
 	 * 
 	 */
 
-	// 添加操作
+	/**
+	 * 
+	 * @Title: save
+	 * @Description: <添加操作>
+	 * @param stu
+	 * @return
+	 */
 	@RequestMapping(value = "/stu_save.html", method = RequestMethod.POST)
 	// 因不再返回页面，故在此注明数据发送方式
 	// 使用 ResponseBody 指定返回的数据不由视图处理器进行渲染，而由消息转换器将数据作为消息返回给客户端
 	@ResponseBody
-	public ModelAndView save(Student stu) {
+	public ModelAndView save(Student stu)
+	{
 		// 验证stu是否为空...接受数据
 		System.out.println("modelandview进来了吗？=========" + stu);
 		Map<String, Object> data = new HashMap<String, Object>();
@@ -97,11 +107,12 @@ public class StuController {
 	 * jsonArray); result.put("total", total); ResponseUtil.write(res, result);
 	 * return null; }
 	 */
-	
+
 	@RequestMapping(value = "/stu_list.json")
-	public String goHome() {
-	System.out.println("lolololololol");
-	return "/stu/stu_list.json";
+	public String goHome()
+	{
+		System.out.println("lolololololol");
+		return "/stu/stu_list.json";
 	}
 
 //	@RequestMapping(value = "/stu_list.html")
@@ -139,38 +150,63 @@ public class StuController {
 	 * HashMap<String,Object>(); map.put("rows", userList); return map; }
 	 */
 
-	// 删除操作 value = "/{ids}/stu_delete.json"传递id
+	/**
+	 * 
+	 * @Title: delete
+	 * @Description: <删除操作 value = "/{ids}/stu_delete.json"传递id>
+	 * @param ids
+	 * @param res
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/{ids}/stu_delete.html", method = RequestMethod.POST)
 	@ResponseBody
 	// 这时的paramId可通过 @Pathvariable注解绑定它传过来的值到方法的参数上。
-	public String delete(@PathVariable String ids, HttpServletResponse res) throws Exception {
-		try {
+	public String delete(@PathVariable String ids, HttpServletResponse res) throws Exception
+	{
+		try
+		{
 			String[] idStr = ids.split(",");// 截取字符串
 			JSONObject result = new JSONObject();
-			for (String id : idStr) {
+			for (String id : idStr)
+			{
 				stuService.delete(Integer.parseInt(id));
 			}
 			result.put("success", true);
 			ResponseUtil.write(res, result);
-		} catch (java.lang.Exception e) {
+		} catch (java.lang.Exception e)
+		{
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	// 修改操作
+	/**
+	 * 
+	 * @Title: update
+	 * @Description: <修改操作>
+	 * @param ids
+	 * @param stu
+	 * @param res
+	 * @return
+	 * @throws Exception
+	 */
 	@RequestMapping(value = "/{ids}/stu_update.html", method = RequestMethod.POST)
-	public String update(@PathVariable String ids, Student stu, HttpServletResponse res) throws Exception {
-		try {
+	public String update(@PathVariable String ids, Student stu, HttpServletResponse res) throws Exception
+	{
+		try
+		{
 			String[] idStr = ids.split(",");// 截取字符串
 			JSONObject result = new JSONObject();
-			for (String id : idStr) {
+			for (String id : idStr)
+			{
 				stu.setId(Integer.parseInt(id));
 			}
 			stuService.change(stu);
 			result.put("success", stuService.change(stu));
 			ResponseUtil.write(res, result);
-		} catch (java.lang.Exception e) {
+		} catch (java.lang.Exception e)
+		{
 			e.printStackTrace();
 		}
 
@@ -178,57 +214,75 @@ public class StuController {
 	}
 
 	/**
-	 * 导出学生信息
 	 * 
-	 * @return AjaxResult
+	 * @Title: exportSheets
+	 * @Description: <导出学生信息>
+	 * @param req
+	 * @param res
 	 * @throws Exception
 	 */
-
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/stu_export.json", params = "method=sheetsExport")
-	public void exportSheets(HttpServletRequest req, HttpServletResponse res) throws Exception {
+	public void exportSheets(HttpServletRequest req, HttpServletResponse res) throws Exception
+	{
 		// Student student = new Student();
 		List<Student> list = stuService.queryStus();
 		Map<String, Object> map = new HashMap<>();
-		for (Student student : list) {
+		for (Student student : list)
+		{
 			map = (Map<String, Object>) student;
 		}
-		String headers[] = new String[] { "编号", "姓名", "电话" };
+		String headers[] = new String[]
+		{ "编号", "姓名", "电话" };
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 		String filename = format.format(new Date().getTime()) + ".xls";
 		res.setContentType("application/ms-excel;charset=UTF-8");
 		OutputStream out = null;
-		try {
+		try
+		{
 			out = res.getOutputStream();
 			res.setHeader("Content-Disposition",
 					"attachment;filename=".concat(String.valueOf(URLEncoder.encode(filename, "UTF-8"))));
 			excelService.exportExcel(headers, map, out);
 			System.out.println("success");
-		} catch (UnsupportedEncodingException e) {
+		} catch (UnsupportedEncodingException e)
+		{
 			e.printStackTrace();
 			System.out.println("error");
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			e.printStackTrace();
-		} finally {
-			try {
+		} finally
+		{
+			try
+			{
 				out.close();
-			} catch (IOException e) {
+			} catch (IOException e)
+			{
 				e.printStackTrace();
 			}
 		}
 	}
 
 	/**
-	 * 导入学生信息
+	 * 
+	 * @Title: importExcels
+	 * @Description: <导入学生信息>
+	 * @param file
+	 * @return
+	 * @throws Exception
 	 */
 	@RequestMapping(value = "/stu_importExcel.json", method = RequestMethod.POST)
-	public String importExcels(@RequestParam MultipartFile file) throws Exception {
+	public String importExcels(@RequestParam MultipartFile file) throws Exception
+	{
 		System.out.println("进来了吗；；；；；？");
-		try {
+		try
+		{
 			List<Student> list = importService.getAllByExcel(file.getInputStream());
 			System.out.println("list::" + list.size() + ",内容：" + list.get(0).getName());
 			stuService.saveStus(list);
-		} catch (IOException e) {
+		} catch (IOException e)
+		{
 			System.out.println("有异常？");
 			e.printStackTrace();
 		}
