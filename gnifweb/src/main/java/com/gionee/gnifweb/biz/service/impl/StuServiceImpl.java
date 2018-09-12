@@ -1,79 +1,92 @@
 package com.gionee.gnifweb.biz.service.impl;
 
-import com.gionee.gnifweb.biz.model.Student;
-import com.gionee.gnifweb.biz.service.IStuService;
-import com.gionee.gnifweb.integration.dao.IStuDao;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
+import com.gionee.gnifweb.biz.model.Student;
+import com.gionee.gnifweb.biz.service.IStuService;
+import com.gionee.gnifweb.integration.dao.IStuDao;
 
 //import com.gionee.gnif.GnifException;
 
 /**
- * 应用层（服务接口）实现类
- * @author zhang
+ * 
+ * @ClassName: StuServiceImpl
+ * @Description: <应用层（服务接口）实现类>
+ * @author 乐
+ * @date 2018年9月12日 下午11:57:33
  *
  */
 @Service
-public class StuServiceImpl implements IStuService{
-	//注入dao层
+public class StuServiceImpl implements IStuService
+{
+	// 注入dao层
 	@Autowired
 	private IStuDao stuDao;
 
-	//添加操作
+	// 添加操作
 	@Override
-	@Transactional//标注事务完成提交动作
-	public int save(Student stu) {
+	@Transactional // 标注事务完成提交动作
+	public int save(Student stu)
+	{
 //		if(stuDao.update(stu)!=1){
 //			throw new GnifException("更新用户信息失败，该数据已经由其他操作员更新！");
 //		}
 		return stuDao.add(stu);
 	}
 
-	//批量添加操作
+	// 批量添加操作
 	@Override
-	public void saveStus(List<Student> list) {
+	public void saveStus(List<Student> list)
+	{
 		stuDao.addStus(list);
 	}
 
-	//删除
+	// 删除
 	@Override
-	public void delete(Integer id) {
+	public void delete(Integer id)
+	{
 		stuDao.del(id);
 	}
 
-	//修改
+	// 修改
 	@Override
-	public int change(Student stu) {
+	public int change(Student stu)
+	{
 		return stuDao.update(stu);
 	}
 
-	//多行查询
+	// 多行查询
 	@Override
-	public List<Student> queryStus() {
-		List<Student> stus=stuDao.getStus();
+	public List<Student> queryStus()
+	{
+		List<Student> stus = stuDao.getStus();
 		return stus;
 	}
 
-	//单行查询
+	// 单行查询
 	@Override
-	public Student getStu(Integer id) {
+	public Student getStu(Integer id)
+	{
 		return stuDao.getStuById(id);
 	}
 
-	//分页
+	// 分页
 	@Override
-	public List<Student> queryForPage(Map<String, Object> map) {
+	public List<Student> queryForPage(Map<String, Object> map)
+	{
 		List<Student> userList = stuDao.getPage(map);
 		return userList;
 	}
 
-	//总记录数
+	// 总记录数
 	@Override
-	public Integer getTotalCount(Map<String,Object> map) {
+	public Integer getTotalCount(Map<String, Object> map)
+	{
 		return stuDao.totalCount(map);
 	}
 }

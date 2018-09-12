@@ -1,29 +1,33 @@
 package com.gionee.gnifweb.biz.service;
 
-import com.gionee.gnifweb.biz.model.Student;
-
 import java.util.List;
 import java.util.Map;
 
+import com.gionee.gnifweb.biz.model.Student;
+
 /**
- * 服务接口
- * @author zhang
+ * 
+ * @ClassName: IStuService
+ * @Description: <服务接口>
+ * @author 乐
+ * @date 2018年9月12日 下午11:57:59
  *
  */
-public interface IStuService {
+public interface IStuService
+{
 	int save(Student stu);
 
-    void saveStus(List<Student> list);
+	void saveStus(List<Student> list);
 
-    void delete(Integer id);
-    
-    int change(Student stu);
+	void delete(Integer id);
 
-    List<Student> queryStus();
+	int change(Student stu);
 
-    Student getStu(Integer id);
-    
-    List<Student> queryForPage(Map<String, Object> map);
+	List<Student> queryStus();
 
-    Integer getTotalCount(Map<String, Object> map);
+	Student getStu(Integer id);
+
+	List<Student> queryForPage(Map<String, Object> map);
+
+	Integer getTotalCount(Map<String, Object> map);
 }

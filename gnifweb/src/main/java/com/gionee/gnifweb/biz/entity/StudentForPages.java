@@ -7,38 +7,57 @@ import com.gionee.gnifweb.web.util.PageBean;
 
 /**
  * 
+ * @ClassName: StudentForPages
+ * @Description: <一句話功能簡述>
  * @author 乐
+ * @date 2018年9月12日 下午11:59:35
  *
  */
-public class StudentForPages {
+public class StudentForPages
+{
 	private Student stu;
 	private PageBean<?> pageBean;
 	private List<Student> userList;
 	private int pageSize;
-	public Student getStu() {
+
+	public Student getStu()
+	{
 		return stu;
 	}
-	public void setStu(Student stu) {
+
+	public void setStu(Student stu)
+	{
 		this.stu = stu;
 	}
-	public PageBean<?> getPageBean() {
+
+	public PageBean<?> getPageBean()
+	{
 		return pageBean;
 	}
-	public void setPageBean(PageBean<?> pageBean) {
+
+	public void setPageBean(PageBean<?> pageBean)
+	{
 		this.pageBean = pageBean;
 	}
-	public List<Student> getUserList() {
+
+	public List<Student> getUserList()
+	{
 		return userList;
 	}
-	public void setUserList(List<Student> userList) {
+
+	public void setUserList(List<Student> userList)
+	{
 		this.userList = userList;
 	}
-	public int getPageSize() {
+
+	public int getPageSize()
+	{
 		return pageSize;
 	}
-	public void setPageSize(int pageSize) {
+
+	public void setPageSize(int pageSize)
+	{
 		this.pageSize = pageSize;
 	}
-	
-	
+
 }
