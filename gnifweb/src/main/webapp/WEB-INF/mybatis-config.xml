@@ -7,7 +7,7 @@
     <setting name="jdbcTypeForNull" value="NULL" />
   </settings>
    <mappers>
-  <mapper resource="com/gionee/gnifweb/integration/mapping/IStuDao.xml"/>
-  <!-- <mapper resource="com/gionee/gnifweb/integration/mapping/IStuDao.xml"/> -->
+  <mapper resource="mybatis/IStuDaoMybatis.xml"/>
+  <!-- <mapper resource="com/gionee/gnifweb/integration/mapping/IStuDaoMybatis.xml"/> -->
   </mappers>
 </configuration>
