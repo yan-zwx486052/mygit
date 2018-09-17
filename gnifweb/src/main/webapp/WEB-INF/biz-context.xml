@@ -21,9 +21,8 @@
 
   <!-- 引入配置文件：方便我们在一个阶段内不需要频繁书写一个参数的值，而在不同阶段间又可以方便的切换参数配置信息 -->
   <context:property-placeholder location="classpath:app.properties"/>
-  <!-- 设置自动扫描包 -->
   <!-- 添加自己的和service实现类 不能添加controller，因为要实现层间的分离-->
-  <context:component-scan base-package="com.gionee.gnifweb.biz.service.impl,com.gionee.gnifweb.integration.dao,com.gionee.devtool.biz.service.impl,com.gionee.auth.impl"/>
+  <context:component-scan base-package="com.gionee.gnifweb.biz.service.impl,com.gionee.gnifweb.integration.dao"/>
   <!-- 启用缓存注解功能，这个是必须的，否则注解不会生效，另外，该注解一定要声明在spring主配置文件中才会生效 --> 
   <cache:annotation-driven cache-manager="cacheManager"/>
 
@@ -69,7 +68,8 @@
 
   <!-- spring和MyBatis完美整合，不需要mybatis的配置映射文件 -->
   <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
-    <property name="configLocation" value="/WEB-INF/mybatis-config.xml" />
+    <!-- <property name="configLocation" value="/WEB-INF/mybatis-config.xml" /> -->
+    <property name="configLocation" value="classpath*:mybatis/*.xml" />
 	<property name="dataSource" ref="dbcp" />
 	<!-- 添加自己的model层包 -->
 	<property name="typeAliasesPackage" value="com.gionee.gnifweb.biz.model" />
@@ -79,6 +79,7 @@
   <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
   	<!-- 添加自己的dao层包 -->
 	<property name="basePackage" value="com.gionee.gnifweb.integration.dao" />
+	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
   </bean>
 
 </beans>

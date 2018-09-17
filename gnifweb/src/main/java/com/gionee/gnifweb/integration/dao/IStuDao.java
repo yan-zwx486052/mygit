@@ -3,8 +3,6 @@ package com.gionee.gnifweb.integration.dao;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.stereotype.Service;
-
 import com.gionee.gnifweb.biz.model.Student;
 
 /**
@@ -15,7 +13,6 @@ import com.gionee.gnifweb.biz.model.Student;
  * @date 2018年9月12日 下午11:56:54
  *
  */
-@Service("stuDao")
 public interface IStuDao
 {
 	int add(Student stu);
