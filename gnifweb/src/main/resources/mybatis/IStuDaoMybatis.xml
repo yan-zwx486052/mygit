@@ -2,7 +2,8 @@
 <!DOCTYPE mapper
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.gionee.gnifweb.integration.dao.mybatis.IStuDaoMybatis">
+<mapper
+	namespace="com.gionee.gnifweb.integration.dao.mybatis.IStuDaoMybatis">
 	<!-- 使用sql将可复用的sql语句包装 利用<include refid="columns"/>进行调用 -->
 	<sql id="columns">
 		id, name, phone
@@ -64,14 +65,14 @@
 
 	<!-- 单行查询操作 -->
 	<select id="getStuById" parameterType="java.lang.Integer"
-		resultType="Student">
+		resultType="com.gionee.gnifweb.biz.model.Student">
 		select
 		<include refid="columns" />
 		from gnif.stu where id=#{id}
 	</select>
 
 	<!-- 多行查询操作 -->
-	<select id="getStus" resultType="Student">
+	<select id="getStus" resultType="com.gionee.gnifweb.biz.model.Student">
 		select
 		<include refid="columns" />
 		from gnif.stu order by id asc

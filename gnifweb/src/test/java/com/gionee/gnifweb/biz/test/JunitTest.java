@@ -11,8 +11,7 @@ import com.gionee.gnifweb.integration.dao.IStuDao;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations =
-{ "classpath*:/biz-context.xml", "classpath*:/mybatis-config.xml", "classpath*:/security-context.xml",
-		"classpath*:/web-context.xml", "classpath*:/ws-context.xml" })
+{ "classpath*:/biz-context.xml", "classpath*:/mybatis-config.xml", "classpath*:/web-context.xml" })
 public class JunitTest
 {
 	@Autowired

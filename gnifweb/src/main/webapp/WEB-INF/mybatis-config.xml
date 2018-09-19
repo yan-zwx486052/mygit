@@ -3,11 +3,15 @@
   PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
-  <settings>
-    <setting name="jdbcTypeForNull" value="NULL" />
-  </settings>
-   <mappers>
-  <mapper resource="mybatis/IStuDaoMybatis.xml"/>
-  <!-- <mapper resource="com/gionee/gnifweb/integration/mapping/IStuDaoMybatis.xml"/> -->
-  </mappers>
+	<settings>
+		<setting name="jdbcTypeForNull" value="NULL" />
+	</settings>
+	<typeAliases>
+		<typeAlias type="com.gionee.gnifweb.biz.model.Student"
+			alias="Student" />
+	</typeAliases>
+	<mappers>
+		<mapper resource="mybatis/IStuDaoMybatis.xml"/>
+		<!-- <mapper resource="com/gionee/gnifweb/integration/mapping/IStuDaoMybatis.xml" /> -->
+	</mappers>
 </configuration>
