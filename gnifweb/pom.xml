@@ -192,6 +192,11 @@
 			<!-- 表示开发的时候引入，发布的时候不会加载此包 -->
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.12</version>
+		</dependency>
 	</dependencies>
 
 
@@ -265,8 +270,8 @@
 				<activeByDefault>true</activeByDefault>
 			</activation>
 			<properties>
-				<db.driver>com.mysql.jdbc.Driver</db.driver>
-				<db.url>jdbc:mysql://localhost/gnif?useUnicode=true&amp;characterEncoding=UTF-8</db.url>
+				<db.driver>com.mysql.cj.jdbc.Driver</db.driver>
+				<db.url>jdbc:mysql://localhost/gnif?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC&amp;userSSL=false</db.url>
 				<db.user>root</db.user>
 				<db.password></db.password>
 				<base.path>http://localhost:8080/${project.artifactId}/</base.path>

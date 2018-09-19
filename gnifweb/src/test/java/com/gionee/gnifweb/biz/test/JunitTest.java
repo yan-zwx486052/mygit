@@ -27,11 +27,4 @@ public class JunitTest
 		System.err.println("---" + student.getPhone());
 		System.err.println("---" + student.getId());
 	}
-
-//	@Test
-//	public void test()
-//	{
-//		Integer id = 1;
-//		Student student = getStuById(id);
-//	}
 }
