@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="gnifweb:war">
-    <output-path>$PROJECT_DIR$/target</output-path>
-    <root id="archive" name="gnifweb.war">
-      <element id="artifact" artifact-name="gnifweb:war exploded" />
-    </root>
-  </artifact>
-</component>

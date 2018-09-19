@@ -1,8 +1,8 @@
 *.idea
 *.iml
 *.class
-gnifweb/.settings/
-gnifweb/target/
-gnifweb/.idea/
+/.settings/
+/target/
+/.idea/
 *.log
 .project
