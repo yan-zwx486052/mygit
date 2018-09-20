@@ -23,7 +23,7 @@
 	</insert>
 
 	<!-- 批量添加操作 -->
-	<insert id="addStus" parameterType="java.util.List">
+	<insert id="saveStus" parameterType="java.util.List">
 		insert into gnif.stu (name,phone) values
 
 		<choose>

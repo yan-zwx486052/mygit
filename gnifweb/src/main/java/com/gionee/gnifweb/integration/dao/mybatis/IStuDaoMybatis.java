@@ -1,5 +1,7 @@
 package com.gionee.gnifweb.integration.dao.mybatis;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 
 import com.gionee.gnifweb.biz.model.Student;
@@ -15,4 +17,8 @@ import com.gionee.gnifweb.biz.model.Student;
 public interface IStuDaoMybatis
 {
 	Student getStuById(@Param("id") Integer id);
+
+	int add(Student stu);
+
+	void saveStus(List<Student> list);
 }

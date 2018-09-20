@@ -33,9 +33,10 @@ public class StuServiceImpl implements IStuService
 	@Transactional // 标注事务完成提交动作
 	public int save(Student stu)
 	{
-//		if(stuDao.update(stu)!=1){
-//			throw new GnifException("更新用户信息失败，该数据已经由其他操作员更新！");
-//		}
+		if (stuDao.add(stu) != 1)
+		{
+			throw new RuntimeException("更新用户信息失败，该数据已经由其他操作员更新！");
+		}
 		return stuDao.add(stu);
 	}
 

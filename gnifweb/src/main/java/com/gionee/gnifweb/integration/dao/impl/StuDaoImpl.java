@@ -28,14 +28,13 @@ public class StuDaoImpl implements IStuDao
 	public int add(Student stu)
 	{
 		// TODO Auto-generated method stub
-		return 0;
+		return stuDaoMybatis.add(stu);
 	}
 
 	@Override
 	public void addStus(List<Student> list)
 	{
-		// TODO Auto-generated method stub
-
+		stuDaoMybatis.saveStus(list);
 	}
 
 	@Override
