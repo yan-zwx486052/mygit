@@ -21,4 +21,10 @@ public interface IStuDaoMybatis
 	int add(Student stu);
 
 	void saveStus(List<Student> list);
+
+	int delete(Integer id);
+
+	int update(Student stu);
+
+	List<Student> queryStus();
 }

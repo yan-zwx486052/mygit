@@ -43,7 +43,7 @@
 	</insert>
 
 	<!-- 删除操作 -->
-	<delete id="del" parameterType="java.lang.Integer">
+	<delete id="delete" parameterType="java.lang.Integer">
 		delete from gnif.stu where
 		id=#{id}
 	</delete>
@@ -53,10 +53,10 @@
 		parameterType="com.gionee.gnifweb.biz.model.Student">
 		update gnif.stu
 		<set>
-			<if test="name!=null">
+			<if test="name != null">
 				name=#{name,jdbcType=VARCHAR},
 			</if>
-			<if test="phone!=null">
+			<if test="phone != null">
 				phone=#{phone,jdbcType=VARCHAR},
 			</if>
 		</set>
@@ -72,7 +72,8 @@
 	</select>
 
 	<!-- 多行查询操作 -->
-	<select id="getStus" resultType="com.gionee.gnifweb.biz.model.Student">
+	<select id="queryStus"
+		resultType="com.gionee.gnifweb.biz.model.Student">
 		select
 		<include refid="columns" />
 		from gnif.stu order by id asc

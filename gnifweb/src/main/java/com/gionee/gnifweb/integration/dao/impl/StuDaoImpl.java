@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import com.gionee.gnifweb.biz.model.Student;
 import com.gionee.gnifweb.integration.dao.IStuDao;
 import com.gionee.gnifweb.integration.dao.mybatis.IStuDaoMybatis;
+import com.gionee.gnifweb.web.util.StringUtil;
 
 /**
  * 
@@ -27,7 +28,6 @@ public class StuDaoImpl implements IStuDao
 	@Override
 	public int add(Student stu)
 	{
-		// TODO Auto-generated method stub
 		return stuDaoMybatis.add(stu);
 	}
 
@@ -40,42 +40,46 @@ public class StuDaoImpl implements IStuDao
 	@Override
 	public int del(Integer id)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		if (StringUtil.isEmpty(String.valueOf(id)))
+		{
+			System.err.println("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
+		return stuDaoMybatis.delete(id);
 	}
 
 	@Override
 	public int update(Student stu)
 	{
-		// TODO Auto-generated method stub
-		return 0;
+		return stuDaoMybatis.update(stu);
 	}
 
 	@Override
 	public List<Student> getStus()
 	{
-		// TODO Auto-generated method stub
-		return null;
+		return stuDaoMybatis.queryStus();
 	}
 
 	@Override
 	public Student getStuById(Integer id)
 	{
-		// TODO Auto-generated method stub
+		if (StringUtil.isEmpty(String.valueOf(id)))
+		{
+			System.err.println("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
 		return stuDaoMybatis.getStuById(id);
 	}
 
 	@Override
 	public List<Student> getPage(Map<String, Object> map)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public Integer totalCount(Map<String, Object> map)
 	{
-		// TODO Auto-generated method stub
 		return null;
 	}
 
