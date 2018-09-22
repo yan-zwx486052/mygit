@@ -22,7 +22,7 @@
   <!-- 引入配置文件：方便我们在一个阶段内不需要频繁书写一个参数的值，而在不同阶段间又可以方便的切换参数配置信息 -->
   <context:property-placeholder location="classpath:app.properties"/>
   <!-- 添加自己的和service实现类 不能添加controller，因为要实现层间的分离-->
-  <context:component-scan base-package="com.gionee.gnifweb.biz.service.impl,com.gionee.gnifweb.integration.dao"/>
+  <context:component-scan base-package="com.zhang.gnifweb.biz.service.impl,com.zhang.gnifweb.integration.dao"/>
   <!-- 启用缓存注解功能，这个是必须的，否则注解不会生效，另外，该注解一定要声明在spring主配置文件中才会生效 --> 
   <cache:annotation-driven cache-manager="cacheManager"/>
 
@@ -72,12 +72,12 @@
     <property name="mapperLocations" value="classpath*:mabatis/**/*Mybatis.xml" />
 	<property name="dataSource" ref="dbcp" />
 	<!-- 添加自己的model层包 -->
-	<property name="typeAliasesPackage" value="com.gionee.gnifweb.biz.model" />
+	<property name="typeAliasesPackage" value="com.zhang.gnifweb.biz.model" />
   </bean>
 
   <!-- DAO接口所在包名，Spring会自动查找其下的类 -->
   <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
-	<property name="basePackage" value="com.gionee.gnifweb.integration" />
+	<property name="basePackage" value="com.zhang.gnifweb.integration" />
 	<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
   </bean>
 

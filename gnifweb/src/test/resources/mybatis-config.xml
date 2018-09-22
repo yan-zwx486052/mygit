@@ -8,6 +8,6 @@
   </settings>
    <mappers>
   <mapper resource="mybatis/IStuDaoMybatis.xml"/>
-  <!-- <mapper resource="com/gionee/gnifweb/integration/mapping/IStuDaoMybatis.xml"/> -->
+  <!-- <mapper resource="com/zhang/gnifweb/integration/mapping/IStuDaoMybatis.xml"/> -->
   </mappers>
 </configuration>
