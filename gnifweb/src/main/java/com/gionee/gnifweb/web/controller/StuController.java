@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.cxf.common.i18n.Exception;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,13 +26,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.gionee.gnifweb.biz.model.Student;
 import com.gionee.gnifweb.biz.service.ExportExcel;
 import com.gionee.gnifweb.biz.service.IStuService;
 import com.gionee.gnifweb.biz.service.impl.ImportService;
+import com.gionee.gnifweb.web.util.PageBean;
 import com.gionee.gnifweb.web.util.ResponseUtil;
+import com.gionee.gnifweb.web.util.StringUtil;
 
+import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
 /**
@@ -45,18 +51,15 @@ import net.sf.json.JSONObject;
 @RequestMapping("stu")
 public class StuController
 {
-	// 注入服务
+	private static final Logger LOG = LogManager.getLogger(StuController.class);
+
 	@Autowired
 	private IStuService stuService;
 
-	// 指定第二级 URL 地址，该级地址与第一级 URL 地址构成完整的业务响应地址。
-	// 如当前响应地址为 /app/save.html，如果客户端发起一个请求为该地址
-	// 则由 save 方法进行响应
-
-	ExportExcel<T> excelService = new ExportExcel<>();
-
 	@Autowired
 	private ImportService importService;
+
+	ExportExcel<T> excelService = new ExportExcel<T>();
 
 	/*
 	 * //添加操作
@@ -79,16 +82,19 @@ public class StuController
 	 * @return
 	 */
 	@RequestMapping(value = "/stu_save.html", method = RequestMethod.POST)
-	// 因不再返回页面，故在此注明数据发送方式
-	// 使用 ResponseBody 指定返回的数据不由视图处理器进行渲染，而由消息转换器将数据作为消息返回给客户端
 	@ResponseBody
 	public ModelAndView save(Student stu)
 	{
-		// 验证stu是否为空...接受数据
-		System.out.println("modelandview进来了吗？=========" + stu);
+		if (null == stu)
+		{
+			LOG.error("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("stus", stuService.save(stu));
-		return new ModelAndView("success", data);// 返回一個ModelAndView对象
+
+		// 返回一個ModelAndView对象
+		return new ModelAndView("success", data);
 	}
 
 	// 显示学生信息（不含查询条件）
@@ -115,29 +121,43 @@ public class StuController
 		return "/stu/stu_list.json";
 	}
 
-//	@RequestMapping(value = "/stu_list.html")
-//	@ResponseBody
-//	public String listPage(Student stu, Integer page, Integer rows, HttpServletResponse res) throws Exception {
-//		try {
-//			PageBean<Object> pageBean = new PageBean<Object>(page, rows);
-//			Map<String, Object> map = new HashMap<String, Object>();
-//			map.put("name", StringUtil.formatLike(stu.getName()));
-//			map.put("phone", StringUtil.formatLike(stu.getPhone()));
-//			map.put("start", pageBean.getStart());// 起始页
-//			map.put("size", pageBean.getPageSize());// 当前页
-//			List<Student> userList = stuService.queryForPage(map);// 获取显示列表数据
-//			Integer total = stuService.getTotalCount(map);// 获取总记录数
-//			JSONObject result = new JSONObject();
-//			JSONArray jsonArray = JSONArray.fromObject(userList);
-//			result.put("rows", jsonArray);
-//			result.put("total", total);
-//			res.sendRedirect(UrlBasedViewResolver.FORWARD_URL_PREFIX + "/WEB-INF/view/stu_list.html");
-//			ResponseUtil.write(res, result);
-//		} catch (java.lang.Exception e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-//	}
+	@RequestMapping(value = "/stu_list.html")
+	@ResponseBody
+	public String listPage(Student stu, Integer page, Integer rows, HttpServletResponse res) throws Exception
+	{
+		if (null == stu)
+		{
+			LOG.error("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
+
+		try
+		{
+			PageBean<Object> pageBean = new PageBean<Object>(page, rows);
+
+			Map<String, Object> map = new HashMap<String, Object>();
+			map.put("name", StringUtil.formatLike(stu.getName()));
+			map.put("phone", StringUtil.formatLike(stu.getPhone()));
+			map.put("start", pageBean.getStart());// 起始页
+			map.put("size", pageBean.getPageSize());// 当前页
+
+			List<Student> userList = stuService.queryForPage(map);// 获取显示列表数据
+			Integer total = stuService.getTotalCount(map);// 获取总记录数
+
+			JSONObject result = new JSONObject();
+			JSONArray jsonArray = JSONArray.fromObject(userList);
+			result.put("rows", jsonArray);
+			result.put("total", total);
+			res.sendRedirect(UrlBasedViewResolver.FORWARD_URL_PREFIX + "/WEB-INF/view/stu_list.html");
+
+			ResponseUtil.write(res, result);
+
+		} catch (java.lang.Exception e)
+		{
+			LOG.error("Unknown error infomation is : {}", e);
+		}
+		return null;
+	}
 
 	// 显示学生信息（返回map）
 	/*
@@ -164,6 +184,12 @@ public class StuController
 	// 这时的paramId可通过 @Pathvariable注解绑定它传过来的值到方法的参数上。
 	public String delete(@PathVariable String ids, HttpServletResponse res) throws Exception
 	{
+		if (StringUtil.isEmpty(ids))
+		{
+			LOG.error("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
+
 		try
 		{
 			String[] idStr = ids.split(",");// 截取字符串
@@ -176,7 +202,7 @@ public class StuController
 			ResponseUtil.write(res, result);
 		} catch (java.lang.Exception e)
 		{
-			e.printStackTrace();
+			LOG.error("Unknown error infomation is : {}", e);
 		}
 		return null;
 	}
@@ -194,6 +220,18 @@ public class StuController
 	@RequestMapping(value = "/{ids}/stu_update.html", method = RequestMethod.POST)
 	public String update(@PathVariable String ids, Student stu, HttpServletResponse res) throws Exception
 	{
+		if (null == stu)
+		{
+			LOG.error("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
+
+		if (StringUtil.isEmpty(ids))
+		{
+			LOG.error("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
+
 		try
 		{
 			String[] idStr = ids.split(",");// 截取字符串
@@ -205,9 +243,10 @@ public class StuController
 			stuService.change(stu);
 			result.put("success", stuService.change(stu));
 			ResponseUtil.write(res, result);
+
 		} catch (java.lang.Exception e)
 		{
-			e.printStackTrace();
+			LOG.error("Unknown error infomation is : {}", e);
 		}
 
 		return null;
@@ -244,22 +283,26 @@ public class StuController
 			res.setHeader("Content-Disposition",
 					"attachment;filename=".concat(String.valueOf(URLEncoder.encode(filename, "UTF-8"))));
 			excelService.exportExcel(headers, map, out);
+
+			LOG.info("Export infomation success. ");
 			System.out.println("success");
 		} catch (UnsupportedEncodingException e)
 		{
-			e.printStackTrace();
-			System.out.println("error");
+			LOG.error("Encoding exception infomation is : {}", e);
 		} catch (IOException e)
 		{
-			e.printStackTrace();
+			LOG.error("IOException infomation is : {}", e);
 		} finally
 		{
-			try
+			if (null != out)
 			{
-				out.close();
-			} catch (IOException e)
-			{
-				e.printStackTrace();
+				try
+				{
+					out.close();
+				} catch (IOException e)
+				{
+					LOG.error("IOException infomation is : {}", e);
+				}
 			}
 		}
 	}
@@ -275,7 +318,11 @@ public class StuController
 	@RequestMapping(value = "/stu_importExcel.json", method = RequestMethod.POST)
 	public String importExcels(@RequestParam MultipartFile file) throws Exception
 	{
-		System.out.println("进来了吗；；；；；？");
+		if (null == file)
+		{
+			LOG.error("Invalid parameter. ");
+			throw new IllegalArgumentException("Invalid parameter. ");
+		}
 		try
 		{
 			List<Student> list = importService.getAllByExcel(file.getInputStream());
@@ -284,7 +331,7 @@ public class StuController
 		} catch (IOException e)
 		{
 			System.out.println("有异常？");
-			e.printStackTrace();
+			LOG.error("IOException infomation is : {} ", e);
 		}
 		return null;
 	}

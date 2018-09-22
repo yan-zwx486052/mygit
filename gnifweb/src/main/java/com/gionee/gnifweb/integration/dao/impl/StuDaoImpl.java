@@ -3,6 +3,8 @@ package com.gionee.gnifweb.integration.dao.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +24,8 @@ import com.gionee.gnifweb.web.util.StringUtil;
 @Repository("stuDao")
 public class StuDaoImpl implements IStuDao
 {
+	private static final Logger LOG = LogManager.getLogger(StuDaoImpl.class);
+
 	@Autowired
 	private IStuDaoMybatis stuDaoMybatis;
 
@@ -42,6 +46,7 @@ public class StuDaoImpl implements IStuDao
 	{
 		if (StringUtil.isEmpty(String.valueOf(id)))
 		{
+			LOG.error("Invalid parameter. ");
 			System.err.println("Invalid parameter. ");
 			throw new IllegalArgumentException("Invalid parameter. ");
 		}
@@ -65,6 +70,7 @@ public class StuDaoImpl implements IStuDao
 	{
 		if (StringUtil.isEmpty(String.valueOf(id)))
 		{
+			LOG.error("Invalid parameter. ");
 			System.err.println("Invalid parameter. ");
 			throw new IllegalArgumentException("Invalid parameter. ");
 		}
@@ -74,13 +80,13 @@ public class StuDaoImpl implements IStuDao
 	@Override
 	public List<Student> getPage(Map<String, Object> map)
 	{
-		return null;
+		return stuDaoMybatis.queryForPage(map);
 	}
 
 	@Override
 	public Integer totalCount(Map<String, Object> map)
 	{
-		return null;
+		return stuDaoMybatis.getTotalCount(map);
 	}
 
 }

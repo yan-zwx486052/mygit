@@ -1,6 +1,7 @@
 package com.gionee.gnifweb.integration.dao.mybatis;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
@@ -22,9 +23,13 @@ public interface IStuDaoMybatis
 
 	void saveStus(List<Student> list);
 
-	int delete(Integer id);
+	int delete(@Param("id") Integer id);
 
 	int update(Student stu);
 
 	List<Student> queryStus();
+
+	List<Student> queryForPage(Map<String, Object> map);
+
+	Integer getTotalCount(Map<String, Object> map);
 }

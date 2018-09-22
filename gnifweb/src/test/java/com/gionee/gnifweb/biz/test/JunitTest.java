@@ -1,7 +1,9 @@
 package com.gionee.gnifweb.biz.test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,8 +12,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.gionee.gnifweb.biz.model.Student;
-import com.gionee.gnifweb.integration.dao.IStuDao;
+import com.gionee.gnifweb.biz.service.IStuService;
+import com.gionee.gnifweb.web.util.PageBean;
 import com.gionee.gnifweb.web.util.StringUtil;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations =
@@ -19,7 +25,7 @@ import com.gionee.gnifweb.web.util.StringUtil;
 public class JunitTest
 {
 	@Autowired
-	private IStuDao stuDao;
+	private IStuService stuService;
 
 	/**
 	 * 
@@ -31,7 +37,7 @@ public class JunitTest
 	{
 		Integer id = 1;
 
-		Student student = stuDao.getStuById(id);
+		Student student = stuService.getStu(id);
 		System.err.println("---" + student.getName());
 		System.err.println("---" + student.getPhone());
 		System.err.println("---" + student.getId());
@@ -40,7 +46,7 @@ public class JunitTest
 	@Test
 	public void getStuList()
 	{
-		List<Student> list = stuDao.getStus();
+		List<Student> list = stuService.queryStus();
 
 		for (Student student : list)
 		{
@@ -61,7 +67,7 @@ public class JunitTest
 		Student stu = new Student();
 		stu.setName(name);
 		stu.setPhone(phone);
-		int result = stuDao.add(stu);
+		int result = stuService.save(stu);
 
 		System.err.println("result---" + result);
 	}
@@ -97,7 +103,7 @@ public class JunitTest
 		listStu.add(stu);
 		listStu.add(stu1);
 		System.err.println(null == stu1);
-		stuDao.addStus(listStu);
+		stuService.saveStus(listStu);
 
 		System.err.println("Add student information success. ");
 	}
@@ -111,8 +117,8 @@ public class JunitTest
 	public void deleteStu()
 	{
 		Integer id = 1;
-		int result = stuDao.del(id);
-		System.err.println("The result of delete student process is : " + result);
+		stuService.delete(id);
+		System.err.println("The result of delete student process is : ");
 	}
 
 	/**
@@ -130,8 +136,38 @@ public class JunitTest
 		student.setId(id);
 		student.setName(name);
 		student.setPhone(phone);
-		int result = stuDao.update(student);
+		int result = stuService.change(student);
 
 		System.err.println("The result of update student process is : " + result);
+	}
+
+	/**
+	 * 
+	 * @Title: queryForPage
+	 * @Description: <分页查找>
+	 */
+	@Test
+	public void queryForPage()
+	{
+//		Student stu = new Student();
+//		String name = "大黄蜂";
+//		String phone = "15933345645";
+		int page = 2;
+		int rows = 10;
+
+		PageBean<Object> pageBean = new PageBean<Object>(page, rows);
+		Map<String, Object> map = new HashMap<String, Object>();
+//		map.put("name", StringUtil.formatLike(stu.getName()));
+//		map.put("phone", StringUtil.formatLike(stu.getPhone()));
+		map.put("start", pageBean.getStart());// 起始页
+		map.put("size", pageBean.getPageSize());// 当前页
+		List<Student> userList = stuService.queryForPage(map);// 获取显示列表数据
+		Integer total = stuService.getTotalCount(map);// 获取总记录数
+		JSONObject result = new JSONObject();
+		JSONArray jsonArray = JSONArray.fromObject(userList);
+		result.put("rows", jsonArray);
+		result.put("total", total);
+
+		System.err.println("The result of queryForPage process is : " + result);
 	}
 }

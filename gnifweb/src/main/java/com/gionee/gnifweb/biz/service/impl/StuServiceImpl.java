@@ -3,6 +3,8 @@ package com.gionee.gnifweb.biz.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,8 @@ import com.gionee.gnifweb.integration.dao.IStuDao;
 @Service
 public class StuServiceImpl implements IStuService
 {
+	private static final Logger LOG = LogManager.getLogger(StuServiceImpl.class);
+
 	// 注入dao层
 	@Autowired
 	private IStuDao stuDao;
@@ -35,6 +39,7 @@ public class StuServiceImpl implements IStuService
 	{
 		if (stuDao.add(stu) != 1)
 		{
+			LOG.error("更新用户信息失败，该数据已经由其他操作员更新！");
 			throw new RuntimeException("更新用户信息失败，该数据已经由其他操作员更新！");
 		}
 		return stuDao.add(stu);
@@ -51,7 +56,12 @@ public class StuServiceImpl implements IStuService
 	@Override
 	public void delete(Integer id)
 	{
-		stuDao.del(id);
+		int result = stuDao.del(id);
+		if (result != 1)
+		{
+			LOG.error("删除用户信息失败，该数据已经由其他操作员更新！");
+			throw new RuntimeException("删除用户信息失败，该数据已经由其他操作员更新！");
+		}
 	}
 
 	// 修改
@@ -80,14 +90,23 @@ public class StuServiceImpl implements IStuService
 	@Override
 	public List<Student> queryForPage(Map<String, Object> map)
 	{
-		List<Student> userList = stuDao.getPage(map);
-		return userList;
+		if (null == map || map.isEmpty())
+		{
+			LOG.error("Invalied parameter. ");
+			throw new IllegalArgumentException("Invalied parameter. ");
+		}
+		return stuDao.getPage(map);
 	}
 
 	// 总记录数
 	@Override
 	public Integer getTotalCount(Map<String, Object> map)
 	{
+		if (null == map || map.isEmpty())
+		{
+			LOG.error("Invalied parameter. ");
+			throw new IllegalArgumentException("Invalied parameter. ");
+		}
 		return stuDao.totalCount(map);
 	}
 }

@@ -80,7 +80,7 @@
 	</select>
 
 	<!-- 分页查询操作 -->
-	<select id="getPage" parameterType="map" resultMap="resultStu">
+	<select id="queryForPage" parameterType="map" resultMap="resultStu">
 		select id, name, phone from gnif.stu
 		<where>
 			<if test="name == null and phone == null">
@@ -100,7 +100,7 @@
 	</select>
 
 	<!-- 获取总记录数 -->
-	<select id="totalCount" parameterType="map"
+	<select id="getTotalCount" parameterType="map"
 		resultType="java.lang.Integer">
 		select count(1) from gnif.stu
 		<where>
