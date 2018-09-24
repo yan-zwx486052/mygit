@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>修改操作</title>
+<title>添加操作</title>
 <script type="text/javascript" src="../js/jquery.min.js"></script>
 <script type="text/javascript" src="../js/jquery.easyui.min.js"></script>
 <script type="text/javascript" src="../js/locale/easyui-lang-zh_CN.js"></script>
@@ -17,17 +17,17 @@
 	<form id="fm" method="post">
 		<div class="fitem">
 			<label>姓名:</label>
-			<input name="name" value="" class="easyui-validatebox" required="true">
+			<input name="name" class="easyui-validatebox" required="true">
 		</div>
 		<div class="fitem">
 			<label>电话:</label>
-			<input name="phone" value="">
+			<input name="phone">
 		</div>
 	</form>
 </div>
 <div id="dlg-buttons">
-	<a href="#" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveUser()">保存</a>
-	<a href="#" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
+	<a href="../" class="easyui-linkbutton" iconCls="icon-ok" onclick="saveStu()">保存</a>
+	<a href="../" class="easyui-linkbutton" iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')">取消</a>
 </div>
 </body>
 </html>

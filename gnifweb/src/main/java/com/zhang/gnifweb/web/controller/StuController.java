@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.view.UrlBasedViewResolver;
 
 import com.zhang.gnifweb.biz.model.Student;
 import com.zhang.gnifweb.biz.service.ExportExcel;
@@ -61,19 +60,6 @@ public class StuController
 
 	ExportExcel<T> excelService = new ExportExcel<T>();
 
-	/*
-	 * //添加操作
-	 * 
-	 * @RequestMapping(value="/stu_save.json", method =
-	 * RequestMethod.POST)//因不再返回页面，故在此注明数据发送方式
-	 *
-	 * // 使用 ResponseBody指定返回的数据不由视图处理器进行渲染，而由消息转换器将数据作为消息返回给客户端
-	 * 
-	 * @ResponseBody public Map save11(@Validated Student stu){ //验证stu是否为空...接受数据
-	 * System.out.println("进来了吗？+++++++++"+stu);
-	 * 
-	 */
-
 	/**
 	 * 
 	 * @Title: save
@@ -81,7 +67,7 @@ public class StuController
 	 * @param stu
 	 * @return
 	 */
-	@RequestMapping(value = "/stu_save.html", method = RequestMethod.POST)
+	@RequestMapping(value = "/stu_save.json", method = RequestMethod.POST)
 	@ResponseBody
 	public ModelAndView save(Student stu)
 	{
@@ -97,31 +83,7 @@ public class StuController
 		return new ModelAndView("success", data);
 	}
 
-	// 显示学生信息（不含查询条件）
-	/*
-	 * @RequestMapping(value = "/stu_list.json")
-	 * 
-	 * @ResponseBody public String listPage(Integer pageSize, Integer page,
-	 * HttpServletResponse res) throws Exception {
-	 * System.out.println("123123123123123"); //PageBean pageBean=new
-	 * PageBean(page,5); //Map<String,Object> map=new HashMap<String,Object>(); //
-	 * map.put("start", pageBean.getStart());//起始页 // map.put("size",
-	 * pageBean.getPageSize());//当前页 List<Student>
-	 * userList=stuService.queryForPage((page-1)*10,10);//获取显示列表数据 Integer
-	 * total=stuService.getTotalCount();//获取总记录数 JSONObject result=new JSONObject();
-	 * JSONArray jsonArray=JSONArray.fromObject(userList); result.put("rows",
-	 * jsonArray); result.put("total", total); ResponseUtil.write(res, result);
-	 * return null; }
-	 */
-
 	@RequestMapping(value = "/stu_list.json")
-	public String goHome()
-	{
-		System.out.println("lolololololol");
-		return "/stu/stu_list.json";
-	}
-
-	@RequestMapping(value = "/stu_list.html")
 	@ResponseBody
 	public String listPage(Student stu, Integer page, Integer rows, HttpServletResponse res) throws Exception
 	{
@@ -148,7 +110,8 @@ public class StuController
 			JSONArray jsonArray = JSONArray.fromObject(userList);
 			result.put("rows", jsonArray);
 			result.put("total", total);
-			res.sendRedirect(UrlBasedViewResolver.FORWARD_URL_PREFIX + "/WEB-INF/view/stu_list.html");
+			// res.sendRedirect(UrlBasedViewResolver.FORWARD_URL_PREFIX +
+			// "/view/stu_list.html");
 
 			ResponseUtil.write(res, result);
 
@@ -160,15 +123,15 @@ public class StuController
 	}
 
 	// 显示学生信息（返回map）
-	/*
-	 * @RequestMapping(value = "/stu_list.json")
-	 * 
-	 * @ResponseBody public Map listPage() throws Exception {
-	 * System.out.println("=================afasfas");
-	 * userList=stuService.queryStus();//获取显示列表数据
-	 * System.out.println("======--------"+userList); Map<String,Object> map=new
-	 * HashMap<String,Object>(); map.put("rows", userList); return map; }
-	 */
+//	@RequestMapping(value = "/stu_list.json")
+//	@ResponseBody
+//	public Map listPage() throws Exception
+//	{
+//		userList = stuService.queryStus();// 获取显示列表数据
+//		Map<String, Object> map = new HashMap<String, Object>();
+//		map.put("rows", userList);
+//		return map;
+//	}
 
 	/**
 	 * 
@@ -179,7 +142,7 @@ public class StuController
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/{ids}/stu_delete.html", method = RequestMethod.POST)
+	@RequestMapping(value = "/{ids}/stu_delete.json", method = RequestMethod.POST)
 	@ResponseBody
 	// 这时的paramId可通过 @Pathvariable注解绑定它传过来的值到方法的参数上。
 	public String delete(@PathVariable String ids, HttpServletResponse res) throws Exception
@@ -217,7 +180,7 @@ public class StuController
 	 * @return
 	 * @throws Exception
 	 */
-	@RequestMapping(value = "/{ids}/stu_update.html", method = RequestMethod.POST)
+	@RequestMapping(value = "/{ids}/stu_update.json", method = RequestMethod.POST)
 	public String update(@PathVariable String ids, Student stu, HttpServletResponse res) throws Exception
 	{
 		if (null == stu)

@@ -125,7 +125,7 @@ body {
 																				.hide();
 																		$
 																				.post(
-																						'stu/'
+																						'../stu/'
 																								+ row.id
 																								+ '/stu_delete.json',
 																						function(
@@ -159,7 +159,7 @@ body {
 										text : '导出',
 										iconCls : 'icon-save',
 										handler : function() {
-											var url = 'stu/stu_export.json?method=sheetsExport';
+											var url = '../stu/stu_export.json?method=sheetsExport';
 											window.location.href = url;
 										}
 									} ],
@@ -200,7 +200,7 @@ body {
 									$(form)
 											.ajaxSubmit(
 													{
-														url : "stu/stu_importExcel.json",
+														url : "../stu/stu_importExcel.json",
 														type : "post",
 														enctype : "multipart/form-data",
 														contentType : "application/x-www-form-urlencoded; charset=utf-8",
@@ -249,7 +249,7 @@ body {
 		//保存函数
 		$("#saveInfo").click(function() {
 			$("#stu-fm").form("submit", {
-				url : "stu/stu_save.json",
+				url : "../stu/stu_save.json",
 				onSubmit : function() {
 					/* if ($("#roleName").combobox("getValue") == "") {
 					    $.messager.alert("系统提示", "请选择用户角色！");
@@ -274,13 +274,14 @@ body {
 		//修改函数
 		$("#updateInfo").click(function() {
 			var row = $("#stu-dg").datagrid("getSelected");
-			//alert(row.id);
+			alert(row.id);
 			$('#stu-fm').form('submit', {
-				url : 'stu/' + row.id + '/stu_update.json',
+				url : '../stu/' + row.id + '/stu_update.json',
 				onSubmit : function() {
 					return $(this).form('validate');
 				},
 				success : function(result) {
+					alert(row.id);
 					//var result = eval('('+result+')');
 					if (result) {
 						$.messager.alert("系统提示", "数据已成功修改！");
