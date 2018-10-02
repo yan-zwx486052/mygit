@@ -232,7 +232,8 @@ public class StuController
 		Map<String, Object> map = new HashMap<>();
 		for (Student student : list)
 		{
-			map = (Map<String, Object>) student;
+			map.put(String.valueOf(student.getId()), student);
+//			map = (Map<String, Object>) student;
 		}
 		String headers[] = new String[]
 		{ "编号", "姓名", "电话" };
@@ -293,7 +294,6 @@ public class StuController
 			stuService.saveStus(list);
 		} catch (IOException e)
 		{
-			System.out.println("有异常？");
 			LOG.error("IOException infomation is : {} ", e);
 		}
 		return null;
