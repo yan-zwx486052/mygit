@@ -223,7 +223,6 @@ public class StuController
 	 * @param res
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "/stu_export.json", params = "method=sheetsExport")
 	public void exportSheets(HttpServletRequest req, HttpServletResponse res) throws Exception
 	{
@@ -249,7 +248,6 @@ public class StuController
 			excelService.exportExcel(headers, map, out);
 
 			LOG.info("Export infomation success. ");
-			System.out.println("success");
 		} catch (UnsupportedEncodingException e)
 		{
 			LOG.error("Encoding exception infomation is : {}", e);
@@ -290,7 +288,6 @@ public class StuController
 		try
 		{
 			List<Student> list = importService.getAllByExcel(file.getInputStream());
-			System.out.println("list::" + list.size() + ",内容：" + list.get(0).getName());
 			stuService.saveStus(list);
 		} catch (IOException e)
 		{
